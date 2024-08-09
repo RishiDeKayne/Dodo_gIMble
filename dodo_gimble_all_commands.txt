@@ -1,0 +1,546 @@
+#De-Kayne 2024
+
+#make working directory
+#mkdir -p /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set && cd /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set
+
+#compile gimble
+git clone https://github.com/DRL/gimble.git
+
+conda create -n gimble_rishi python=3.7.12 bedtools bcftools samtools vcflib mosdepth=0.3.2 pysam numpy docopt tqdm pandas tabulate zarr scikit-allel parallel matplotlib msprime demes dask numcodecs python-newick nlopt -c conda-forge -c bioconda -y
+
+conda activate gimble_rishi
+
+pip install agemo
+
+#going to have one individual per species
+
+#filter vcf to just have those individuals
+  
+#make symlinks for .bam and .bai files in bam directory
+
+#want to make a bed file for that excludes annotations within them
+
+#############################################################################################
+##PREVIOUS DANAUS GIMBLE COMMANDS:
+#want to run gIMble on focal indivs, 6 for each morph - put in gimble.indiv.list
+#klugii = WAT : "SM15W61", "SM15W66", "SM15W69", "SM15W72", "SM15W74", "SM18W01"
+#orientis = TSW : "SM21TS03", "SM21TS05", "SM21TS16", "SM21TS33", "SM21TS34", "SM21TS35", "SM21TS36"
+#chrysippus = NGA : "SM16N01", "SM16N04", "SM16N05", "SM16N06", "SM16N20", "SM16N37"
+#Karamu = KARA : "SM21SP06", "SM21SP09"
+
+cp ../ 2ndindiv_set/gimble.indiv.list .
+#add karamu individuals
+
+#subset overall vcf and then may symlinks to the realigned.bam files for each of these indivs
+#using /data/martin/genomics/analyses/Danaus_popgen/DC174/combined_vcfs/DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs.b.vcf.gz
+
+sconda genomics_general
+echo "bcftools view -S /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/gimble.indiv.list -Oz -o /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs_reference_individuals3.b.vcf.gz /data/martin/genomics/analyses/Danaus_popgen/DC174/combined_vcfs/DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs.b.vcf.gz" > filt.vcf.run.txt
+
+parallel -j 1 'qsub -cwd -N gimble_filt -V -pe smp64 4 -l h=bigwig -b yes {}' :::: filt.vcf.run.txt
+
+#make reheader file with short name and long name
+echo "bcftools reheader --samples /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/reheader.txt -o ./DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs_reference_individuals3_renamed.b.vcf.gz /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs_reference_individuals3.b.vcf.gz" > reheader.vcf.run.txt
+
+parallel -j 1 'qsub -cwd -N gimble_filt -V -pe smp64 4 -l h=bigwig -b yes {}' :::: reheader.vcf.run.txt
+
+ssh bigwig
+mkdir -p /scratch/rdekayne/gimble3/
+mkdir -p /scratch/rdekayne/gimble3/bams && cd /scratch/rdekayne/gimble3/bams
+
+#make symlinks for bam files in bam directory
+##ln -s source_file myfile
+
+##chrysippus
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N01.DSW44968.220307.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N01.DSW44968.220307.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N04.DSW31516.170110.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N04.DSW31516.170110.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N05.DSW44977.170724.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N05.DSW44977.170724.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N06.DSW31517.220307.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N06.DSW31517.220307.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N20.DSW44964.170724.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N20.DSW44964.170724.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N37.DSW44975.170724.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM16N37.DSW44975.170724.Dchry2.2.bwa.default.rmdup.bai
+
+##orientis
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS03.H5J5MDSX5.221107.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS03.H5J5MDSX5.221107.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS05.H5CKGDSX5.221107.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS05.H5CKGDSX5.221107.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS16.308.220202.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS16.308.220202.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS33.309.220202.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS33.309.220202.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS34.310.220202.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS34.310.220202.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS35.H5GL5DSX5.221107.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS35.H5GL5DSX5.221107.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS36.EDSW220000311-1a.220215.Dchry2.2.bwa.default.rmdup_2sets.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21TS36.EDSW220000311-1a.220215.Dchry2.2.bwa.default.rmdup_2sets.bai
+
+##klugii
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM15W61.DSW44971.170724.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM15W61.DSW44971.170724.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM15W66.DSW44966.170724.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM15W66.DSW44966.170724.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM15W69.EDSW200000315-1a.220307.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM15W69.EDSW200000315-1a.220307.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM15W72.DSW44976.170724.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM15W72.DSW44976.170724.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM15W74.DSW31519.170110.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM15W74.DSW31519.170110.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM18W01.HGWY7DSXX.190809.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM18W01.HGWY7DSXX.190809.Dchry2.2.bwa.default.rmdup.bai
+
+##karamu
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21SP06.304.220202.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21SP06.304.220202.Dchry2.2.bwa.default.rmdup.bai
+
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21SP09.307.220202.Dchry2.2.bwa.default.rmdup.bam
+ln -s /data/martin/genomics/analyses/Danaus_mapping/DC174/realigned/realigned_bams/realigned.SM21SP09.307.220202.Dchry2.2.bwa.default.rmdup.bai
+
+
+touch gimble.run
+echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble preprocess -f /data/martin/genomics/analyses/Danaus_genome/Dchry2/Dchry2.2.fa -v /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs_reference_individuals3.b.vcf.gz  -b /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/bams/ -g 2 -q 20 -m 8 -M 2 -t 20 -o /scratch/rdekayne/gimble3/ref_run " > gimble.run
+
+parallel -j 1 'qsub -cwd -N gimble_run -V -pe smp64 20 -l h=bigwig -b yes {}' :::: gimble.run
+
+#want to make a bed file for each inversion that excludes annotations within them
+mkdir -p /scratch/rdekayne/gimble3/reference_indivs_gimble3/bedfiles && cd /scratch/rdekayne/gimble3/reference_indivs_gimble3/bedfiles
+
+echo 'contig15.1  4035981  5322257' > inv1.1.bed
+echo 'contig15.1  5323805  6220875' > inv1.2.bed
+echo 'contig15.1  6251636 7829094' > inv2.bed
+echo 'contig15.1  14803486  15299732' > inv4.bed
+
+bedtools intersect -a ../../ref_run.bed -b inv1.1.bed > gimble.inv1.1.bed
+bedtools intersect -a ../../ref_run.bed -b inv1.2.bed > gimble.inv1.2.bed
+bedtools intersect -a ../../ref_run.bed -b inv2.bed > gimble.inv2.bed
+bedtools intersect -a ../../ref_run.bed -b inv4.bed > gimble.inv4.bed
+
+wc -l gimble.inv*
+#   80361 gimble.inv1.1.bed
+#   57217 gimble.inv1.2.bed
+#   94876 gimble.inv2.bed
+#   24238 gimble.inv4.bed
+#  256692 total
+
+bedtools subtract -a gimble.inv1.1.bed -b /data/martin/genomics/analyses/Danaus_genome/Dchry2/braker_annotation_RDK_Dchry2_2/Dchry2.2.fa.masked_annotation_a001.sequences.tidy.gff3.bed > gimble.intergenic.inv1.1.bed
+bedtools subtract -a gimble.inv1.2.bed -b /data/martin/genomics/analyses/Danaus_genome/Dchry2/braker_annotation_RDK_Dchry2_2/Dchry2.2.fa.masked_annotation_a001.sequences.tidy.gff3.bed > gimble.intergenic.inv1.2.bed
+bedtools subtract -a gimble.inv2.bed -b /data/martin/genomics/analyses/Danaus_genome/Dchry2/braker_annotation_RDK_Dchry2_2/Dchry2.2.fa.masked_annotation_a001.sequences.tidy.gff3.bed > gimble.intergenic.inv2.bed
+bedtools subtract -a gimble.inv4.bed -b /data/martin/genomics/analyses/Danaus_genome/Dchry2/braker_annotation_RDK_Dchry2_2/Dchry2.2.fa.masked_annotation_a001.sequences.tidy.gff3.bed > gimble.intergenic.inv4.bed
+
+wc -l *.intergenic*
+#   49100 gimble.intergenic.inv1.1.bed
+#   40147 gimble.intergenic.inv1.2.bed
+#   64910 gimble.intergenic.inv2.bed
+#   19560 gimble.intergenic.inv4.bed
+#  173717 total
+
+mkdir -p /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/invs
+cp gimble.intergenic.*.bed /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/invs/
+bcftools query -l ./DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs_reference_individuals3.b.vcf.gz
+#klu
+SM15W61
+SM15W66
+SM15W69
+SM15W72
+SM15W74
+SM18W01
+#ori
+SM21TS03
+SM21TS05
+SM21TS16
+SM21TS33
+SM21TS34
+SM21TS35
+SM21TS36
+#chr
+SM16N01
+SM16N04
+SM16N05
+SM16N06
+SM16N20
+SM16N37
+#kar
+SM21SP06
+SM21SP09
+#different sample files for different comparisons
+
+#kluori.samples.csv
+SM15W61,klu
+SM15W66,klu
+SM15W69,klu
+SM15W72,klu
+SM15W74,klu
+SM18W01,klu
+SM21TS03,ori
+SM21TS05,ori
+SM21TS16,ori
+SM21TS33,ori
+SM21TS34,ori
+SM21TS35,ori
+SM21TS36,ori
+
+#chrori.samples.csv
+SM16N01,chr
+SM16N04,chr
+SM16N05,chr
+SM16N06,chr
+SM16N20,chr
+SM16N37,chr
+SM21TS03,ori
+SM21TS05,ori
+SM21TS16,ori
+SM21TS33,ori
+SM21TS34,ori
+SM21TS35,ori
+SM21TS36,ori
+
+#chrklu.samples.csv
+SM16N01,chr
+SM16N04,chr
+SM16N05,chr
+SM16N06,chr
+SM16N20,chr
+SM16N37,chr
+SM15W61,klu
+SM15W66,klu
+SM15W69,klu
+SM15W72,klu
+SM15W74,klu
+SM18W01,klu
+
+#karklu.samples.csv
+SM21SP06,kar
+SM21SP09,kar
+SM15W61,klu
+SM15W66,klu
+SM15W69,klu
+SM15W72,klu
+SM15W74,klu
+SM18W01,klu
+
+#karori.samples.csv
+SM21SP06,kar
+SM21SP09,kar
+SM21TS03,ori
+SM21TS05,ori
+SM21TS16,ori
+SM21TS33,ori
+SM21TS34,ori
+SM21TS35,ori
+SM21TS36,ori
+
+#karchr.samples.csv
+SM21SP06,kar
+SM21SP09,kar
+SM16N01,chr
+SM16N04,chr
+SM16N05,chr
+SM16N06,chr
+SM16N20,chr
+SM16N37,chr
+
+wc -l *.samples.csv
+# 12 chrklu.samples.csv
+# 13 chrori.samples.csv
+#  8 karchr.samples.csv
+#  8 karklu.samples.csv
+#  9 karori.samples.csv
+# 13 kluori.samples.csv
+# 63 total
+
+ls *.csv > samples.txt
+sed 's/.samples.csv//g' samples.txt > sample_names.txt
+ls *.bed > bed_files.txt
+
+######PARSE
+touch parse.gimble.run
+cat samples.txt | while read sample
+do
+cat bed_files.txt | while read bed
+do
+echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble parse -v /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/ref_run.vcf.gz -b /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/invs/${bed} -g /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/ref_run.genomefile -s ${sample} -z ${sample}_${bed}_store" >> parse.gimble.run
+done
+done
+
+parallel -j 1 'qsub -cwd -N gimble_parse -V -pe smp64 20 -l h=bigbird -b yes {}' :::: parse.gimble.run
+
+######BLOCKS
+touch blocks.gimble.run
+cat samples.txt | while read sample
+do
+cat bed_files.txt | while read bed
+do
+echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble blocks -z ${sample}_${bed}_store.z -l 64" >> blocks.gimble.run
+done
+done
+
+parallel -j 1 'qsub -cwd -N gimble_blocks -V -pe smp64 20 -l h=bigbird -b yes {}' :::: blocks.gimble.run
+
+
+######WINDOWS
+touch windows.gimble.run
+cat samples.txt | while read sample
+do
+cat bed_files.txt | while read bed
+do
+echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble windows -z ${sample}_${bed}_store.z -w 500 -s 100" >> windows.gimble.run
+done
+done
+
+parallel -j 1 'qsub -cwd -N gimble_windows -V -pe smp64 20 -l h=bigbird -b yes {}' :::: windows.gimble.run
+
+
+######INFO
+touch info.gimble.run
+cat samples.txt | while read sample
+do
+cat bed_files.txt | while read bed
+do
+echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble info -z ${sample}_${bed}_store.z" >> info.gimble.run
+done
+done
+
+parallel -j 1 'qsub -cwd -N gimble_info -V -pe smp64 20 -l h=bigbird -b yes {}' :::: info.gimble.run
+
+
+######TALLY
+touch tally.gimble.run
+cat samples.txt | while read sample
+do
+cat bed_files.txt | while read bed
+do
+echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble tally -z ${sample}_${bed}_store.z -k 2,2,2,2 -l blocks_kmax2 -t blocks" >> tally.gimble.run
+done
+done
+
+parallel -j 1 'qsub -cwd -N gimble_tally -V -pe smp64 20 -l h=bigbird -b yes {}' :::: tally.gimble.run
+
+######OPTIMIZE
+
+touch optimize.div.gimble.run
+cat samples.txt | while read sample
+do
+cat bed_files.txt | while read bed
+do
+echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble optimize -z ${sample}_${bed}_store.z -d tally/blocks_kmax2 -r A -u 2e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=80_000,6_000_000 -B=80_000,6_000_000 -C=80_000,6_000_000 -T=0,6_000_000 -m DIV -l DIV -f" >> optimize.div.gimble.run
+done
+done
+
+parallel -j 1 'qsub -cwd -N gimble_div_optimize -V -pe smp64 20 -l h=bigbird -b yes {}' :::: optimize.div.gimble.run
+
+grep "COMPLETED" *.o*
+
+touch optimize.IM_AB.gimble.run
+cat samples.txt | while read sample
+do
+cat bed_files.txt | while read bed
+do
+echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble optimize -z ${sample}_${bed}_store.z -d tally/blocks_kmax2 -r A -u 2e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=80_000,6_000_000 -B=80_000,6_000_000 -C=80_000,6_000_000 -T=0,7_000_000 -M=0,2.21E-04 -m IM_AB -l IM_AB -f" >> optimize.IM_AB.gimble.run
+done
+done
+
+parallel -j 1 'qsub -cwd -N gimble_div_optimize -V -pe smp64 20 -l h=bigbird -b yes {}' :::: optimize.IM_AB.gimble.run
+
+touch optimize.IM_BA.gimble.run
+cat samples.txt | while read sample
+do
+cat bed_files.txt | while read bed
+do
+echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble optimize -z ${sample}_${bed}_store.z -d tally/blocks_kmax2 -r A -u 2e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=80_000,6_000_000 -B=80_000,6_000_000 -C=80_000,6_000_000 -T=0,7_000_000 -M=0,2.21E-04 -m IM_BA -l IM_BA -f" >> optimize.IM_BA.gimble.run
+done
+done
+
+parallel -j 1 'qsub -cwd -N gimble_div_optimize -V -pe smp64 20 -l h=bigbird -b yes {}' :::: optimize.IM_BA.gimble.run
+
+
+#####QUERY output
+#INV1.1
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv1.1.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+#INV1.2
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv1.2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+#INV2
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv2.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+#INV4
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrklu.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/chrori.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/kluori.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karklu.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karori.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_BA
+
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/DIV
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_AB
+
+/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble query -z /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/karchr.samples.csv_gimble.intergenic.inv4.bed_store.z -l optimize/blocks_kmax2/IM_BA
