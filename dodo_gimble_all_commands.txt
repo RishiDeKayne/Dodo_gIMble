@@ -1,16 +1,14 @@
 #De-Kayne 2024
 
+
+conda create -p /global/scratch/users/rdekayne/envs/gimble
+source activate base
+conda activate /global/scratch/users/rdekayne/envs/gimble
+conda install -c conda-forge gimble
+conda install -c bioconda gimbleprep
+
 #make working directory
-#mkdir -p /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set && cd /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set
-
-#compile gimble
-git clone https://github.com/DRL/gimble.git
-
-conda create -n gimble_rishi python=3.7.12 bedtools bcftools samtools vcflib mosdepth=0.3.2 pysam numpy docopt tqdm pandas tabulate zarr scikit-allel parallel matplotlib msprime demes dask numcodecs python-newick nlopt -c conda-forge -c bioconda -y
-
-conda activate gimble_rishi
-
-pip install agemo
+#mkdir -p /global/scratch/users/rdekayne/dodo && cd /global/scratch/users/rdekayne/dodo
 
 #going to have one individual per species
 
