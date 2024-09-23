@@ -1,11 +1,15 @@
 #De-Kayne 2024
-
-
+### conda installs
 conda create -p /global/scratch/users/rdekayne/envs/gimble
 source activate base
 conda activate /global/scratch/users/rdekayne/envs/gimble
 conda install -c conda-forge gimble
 conda install -c bioconda gimbleprep
+conda install conda-forge::rclone
+
+1hyknTlmkb3-kTPbix1qxswk-O9xakhwS
+
+rclone copy --drive-shared-with-me drive:Rishi/ .
 
 #make working directory
 #mkdir -p /global/scratch/users/rdekayne/dodo && cd /global/scratch/users/rdekayne/dodo
