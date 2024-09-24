@@ -1,4 +1,7 @@
 #De-Kayne 2024
+#make working directory
+#mkdir -p /global/scratch/users/rdekayne/dodo && cd /global/scratch/users/rdekayne/dodo
+
 ### conda installs
 conda create -p /global/scratch/users/rdekayne/envs/gimble
 source activate base
@@ -6,13 +9,41 @@ conda activate /global/scratch/users/rdekayne/envs/gimble
 conda install -c conda-forge gimble
 conda install -c bioconda gimbleprep
 conda install conda-forge::rclone
-
-1hyknTlmkb3-kTPbix1qxswk-O9xakhwS
+conda install samtools
 
 rclone copy --drive-shared-with-me drive:Rishi/ .
 
-#make working directory
-#mkdir -p /global/scratch/users/rdekayne/dodo && cd /global/scratch/users/rdekayne/dodo
+samtools faixd Nicobar2.fasta
+
+# cram_to_bam.sh
+
+#!/bin/bash
+#SBATCH --job-name=convert
+#SBATCH --time=0-12:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --qos=savio_lowprio
+#SBATCH --output=convert.%j.out # output file
+#SBATCH --error=convert.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=1 # One task per computer
+
+GENOME=$1
+CRAM=$2
+BAM=$3
+
+samtools view -b -T ${GENOME} -o ${BAM} ${CRAM}
+
+touch ${CRAM}_converted.done
+
+##run
+sbatch cram_to_bam.sh Nicobar2.fasta SMF048.cram SMF048.bam
+sbatch cram_to_bam.sh Nicobar2.fasta SMF046.cram SMF046.bam
+sbatch cram_to_bam.sh Nicobar2.fasta SMF045.cram SMF045.bam
+sbatch cram_to_bam.sh Nicobar2.fasta SMF044.cram SMF044.bam
+sbatch cram_to_bam.sh Nicobar2.fasta DodoxNicobar.cram DodoxNicobar.bam
+sbatch cram_to_bam.sh Nicobar2.fasta ManumeaxNicobar.cram ManumeaxNicobar.bam
+sbatch cram_to_bam.sh Nicobar2.fasta SolitairexNicobar.cram SolitairexNicobar.bam
 
 #going to have one individual per species
 
