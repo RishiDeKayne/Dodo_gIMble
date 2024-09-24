@@ -45,41 +45,22 @@ sbatch cram_to_bam.sh Nicobar2.fasta DodoxNicobar.cram DodoxNicobar.bam
 sbatch cram_to_bam.sh Nicobar2.fasta ManumeaxNicobar.cram ManumeaxNicobar.bam
 sbatch cram_to_bam.sh Nicobar2.fasta SolitairexNicobar.cram SolitairexNicobar.bam
 
-#going to have one individual per species
-
-#filter vcf to just have those individuals
-  
-#make symlinks for .bam and .bai files in bam directory
-
-#want to make a bed file for that excludes annotations within them
-
-#############################################################################################
-##PREVIOUS DANAUS GIMBLE COMMANDS:
-#want to run gIMble on focal indivs, 6 for each morph - put in gimble.indiv.list
-#klugii = WAT : "SM15W61", "SM15W66", "SM15W69", "SM15W72", "SM15W74", "SM18W01"
-#orientis = TSW : "SM21TS03", "SM21TS05", "SM21TS16", "SM21TS33", "SM21TS34", "SM21TS35", "SM21TS36"
-#chrysippus = NGA : "SM16N01", "SM16N04", "SM16N05", "SM16N06", "SM16N20", "SM16N37"
-#Karamu = KARA : "SM21SP06", "SM21SP09"
-
-cp ../ 2ndindiv_set/gimble.indiv.list .
-#add karamu individuals
+#want to run gIMble on focal indivs, 1 for each morph - put in gimble.indiv.list
+#DODO = do : "DodoxNicobar"
+#MANUMEA = ma : "ManumeaxNicobar"
+#SOLITAIRE = so : "SolitairexNicobar"
+#NICOBAR = ni : "SMF045"
 
 #subset overall vcf and then may symlinks to the realigned.bam files for each of these indivs
-#using /data/martin/genomics/analyses/Danaus_popgen/DC174/combined_vcfs/DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs.b.vcf.gz
+#using /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz
 
 sconda genomics_general
-echo "bcftools view -S /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/gimble.indiv.list -Oz -o /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs_reference_individuals3.b.vcf.gz /data/martin/genomics/analyses/Danaus_popgen/DC174/combined_vcfs/DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs.b.vcf.gz" > filt.vcf.run.txt
-
-parallel -j 1 'qsub -cwd -N gimble_filt -V -pe smp64 4 -l h=bigwig -b yes {}' :::: filt.vcf.run.txt
+bcftools view -S ./gimble.indiv.list -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_reference_individuals.b.vcf.gz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz
 
 #make reheader file with short name and long name
-echo "bcftools reheader --samples /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/reheader.txt -o ./DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs_reference_individuals3_renamed.b.vcf.gz /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs_reference_individuals3.b.vcf.gz" > reheader.vcf.run.txt
+echo "bcftools reheader --samples ./reheader.txt -o ./Nicobar_Alignments_reference_individuals_renamed.b.vcf.gz Nicobar_Alignments_reference_individuals.b.vcf.gz
 
 parallel -j 1 'qsub -cwd -N gimble_filt -V -pe smp64 4 -l h=bigwig -b yes {}' :::: reheader.vcf.run.txt
-
-ssh bigwig
-mkdir -p /scratch/rdekayne/gimble3/
-mkdir -p /scratch/rdekayne/gimble3/bams && cd /scratch/rdekayne/gimble3/bams
 
 #make symlinks for bam files in bam directory
 ##ln -s source_file myfile
