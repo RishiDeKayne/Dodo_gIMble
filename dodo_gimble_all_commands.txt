@@ -82,6 +82,12 @@ sbatch index_bams.sh
 
 bcftools view -S ./gimble.indiv.list -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_reference_individuals.b.vcf.gz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz
 
+bcftools filter -Oz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_reference_individuals.b.vcf.gz -e 'AN < 8' | bcftools sort -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_reference_individuals_mac1_AN8.vcf.gz
+
+bcftools filter -Oz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_reference_individuals.b.vcf.gz -e 'AN < 8' | bcftools view -m2 -M2 -v snps | bcftools sort -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_reference_individuals_mac1_AN8.vcf.gz
+
+bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_reference_individuals_mac1_AN8.vcf.gz | wc -l
+
 #make symlinks for bam files in bam directory
 ##ln -s source_file myfile
 
