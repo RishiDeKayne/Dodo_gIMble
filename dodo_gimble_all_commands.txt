@@ -82,17 +82,12 @@ sbatch index_bams.sh
 
 bcftools filter -Oz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz -e 'AN < 14' | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14.vcf.gz
 
+zcat Nicobar_Alignments_AN14.vcf.gz | grep "BaseQRankSum" | wc -l
+5929882
+
+bcftools filter -Oz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz -e 'AN < 14' | bcftools view -m2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2_snps.vcf.gz
 
 
-
-
-
-vcftools --gzvcf /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz --remove-indels --min-alleles 2 --max-alleles 2 --recode --stdout | gzip -c > /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_m2M2.vcf.gz
-
-bcftools view -S ./gimble.indiv.list -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_reference_individuals.b.vcf.gz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz
-
-
-bcftools filter -Oz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz -e 'AN < 14' | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14.vcf.gz
 
 bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_reference_individuals_mac1_AN8.vcf.gz | wc -l
 
