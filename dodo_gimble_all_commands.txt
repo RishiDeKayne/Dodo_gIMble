@@ -12,6 +12,7 @@ conda install conda-forge::rclone
 conda install samtools
 
 rclone copy --drive-shared-with-me drive:Rishi/ .
+rclone copy --drive-shared-with-me drive:Rishi/*vcf* .
 
 samtools faixd Nicobar2.fasta
 
@@ -80,16 +81,10 @@ sbatch index_bams.sh
 #subset overall vcf and then may symlinks to the realigned.bam files for each of these indivs
 #using /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz
 
-bcftools filter -Oz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz -e 'AN < 14' | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14.vcf.gz
-
-zcat Nicobar_Alignments_AN14.vcf.gz | grep "BaseQRankSum" | wc -l
-5929882
-
-bcftools filter -Oz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz -e 'AN < 14' | bcftools view -m2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2_snps.vcf.gz
+bcftools filter -Oz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz -e 'AN < 14' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz
 
 
-
-bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_reference_individuals_mac1_AN8.vcf.gz | wc -l
+bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | wc -l
 
 #make symlinks for bam files in bam directory
 ##ln -s source_file myfile
