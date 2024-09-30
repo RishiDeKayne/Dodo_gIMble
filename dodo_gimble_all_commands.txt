@@ -83,8 +83,19 @@ sbatch index_bams.sh
 
 bcftools filter -Oz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz -e 'AN < 14' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz
 
-
 bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | wc -l
+#10902319
+
+##4_samples_list.txt
+Dodo
+Manumea
+Solitaire
+SMF045
+
+bcftools view -Oz -S 4_samples_list.txt /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz > /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz
+
+
+
 
 #make symlinks for bam files in bam directory
 ##ln -s source_file myfile
