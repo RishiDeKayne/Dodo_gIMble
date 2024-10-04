@@ -92,33 +92,67 @@ Manumea
 Solitaire
 SMF045
 
-bcftools view -Oz -S 4_samples_list.txt /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz > /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz
+bcftools view -Oz -S 4_samples_list.txt -m2 -M2 /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | bcftools view -m2 -M2 | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz
 
-
-
+bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz | wc -l
+10902319
 
 #make symlinks for bam files in bam directory
 ##ln -s source_file myfile
 
-ln -s Dodo.bam
-ln -s Dodo.bai
+ln -s ../data/Dodo.bam
+ln -s ../data/Dodo.bam.bai
 
-ln -s Manumea.bam
-ln -s Manumea.bai
+ln -s ../data/Manumea.bam
+ln -s ../data/Manumea.bam.bai
 
-ln -s Solitaire.bam
-ln -s Solitaire.bai
+ln -s ../data/Solitaire.bam
+ln -s ../data/Solitaire.bam.bai
 
-ln -s SMF045.bam
-ln -s SMF045.bai
+ln -s ../data/SMF045.bam
+ln -s ../data/SMF045.bam.bai
 
 ##############################################
-#                STEP1
+#                STEP1 - gimbleprep
 ##############################################
-touch gimble.run
-echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble preprocess -f /data/martin/genomics/analyses/Danaus_genome/Dchry2/Dchry2.2.fa -v /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs_reference_individuals3.b.vcf.gz  -b /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/bams/ -g 2 -q 20 -m 8 -M 2 -t 20 -o /scratch/rdekayne/gimble3/ref_run " > gimble.run
 
-parallel -j 1 'qsub -cwd -N gimble_run -V -pe smp64 20 -l h=bigwig -b yes {}' :::: gimble.run
+# 01_gimbleprep.sh
+
+#!/bin/bash
+#SBATCH --job-name=gimb1
+#SBATCH --time=0-12:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --output=gimb1.%j.out # output file
+#SBATCH --error=gimb1.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=20 # One task per computer
+
+gimbleprep -f /global/scratch/users/rdekayne/dodo/data/Nicobar2.fasta -v /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz -b /global/scratch/users/rdekayne/dodo/gimble/ -t 20 -o /global/scratch/users/rdekayne/dodo/gimble/run1
+
+touch /global/scratch/users/rdekayne/dodo/gimble/preprocess.done
+
+##run
+sbatch 01_gimbleprep.sh
+
+get nicobar gff as bed
+cat Nicobar2.polished.gff | grep -v "#" | cut -f1 > Nicobar2.gff.chrom.txt
+cat Nicobar2.polished.gff | grep -v "#" | cut -f4 > Nicobar2.gff.start.txt
+cat Nicobar2.polished.gff | grep -v "#" | cut -f5 > Nicobar2.gff.end.txt
+paste Nicobar2.gff.chrom.txt Nicobar2.gff.start.txt Nicobar2.gff.end.txt > Nicobar2.gff.bed
+
+#make gimble bed file for small chrom
+
+echo 'CM069651.1  1  6780555' > chrCM069651.bed
+bedtools intersect -a ../../ref_run.bed -b chrCM069651.bed > gimble.chrCM069651.bed
+bedtools subtract -a gimble.chrCM069651.bed -b Nicobar2.gff.bed > gimble.intergenic.chrCM069651.bed
+
+
+
+
+
+
+
 
 #want to make a bed file for each inversion that excludes annotations within them
 mkdir -p /scratch/rdekayne/gimble3/reference_indivs_gimble3/bedfiles && cd /scratch/rdekayne/gimble3/reference_indivs_gimble3/bedfiles
