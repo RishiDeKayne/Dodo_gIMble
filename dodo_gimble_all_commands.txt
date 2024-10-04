@@ -97,20 +97,101 @@ bcftools view -Oz -S 4_samples_list.txt -m2 -M2 /global/scratch/users/rdekayne/d
 bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz | wc -l
 10902319
 
+conda activate /global/scratch/users/rdekayne/envs/mapping
+
+#add RGs
+
+## addRG.sh
+#!/bin/bash
+#SBATCH --job-name=pic
+#SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --output=pic.%j.out # output file
+#SBATCH --error=pic.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=1 # One task per computer
+#SBATCH --cpus-per-task=24 # 2 CPUs per job
+
+module load java/22.0.1
+
+picard AddOrReplaceReadGroups \
+       I=Dodo.bam \
+       O=DodoRG.bam \
+       RGID=4 \
+       RGLB=lib1 \
+       RGPL=ILLUMINA \
+       RGPU=unit1 \
+       RGSM=10
+
+picard AddOrReplaceReadGroups \
+       I=Manumea.bam \
+       O=ManumeaRG.bam \
+       RGID=4 \
+       RGLB=lib1 \
+       RGPL=ILLUMINA \
+       RGPU=unit1 \
+       RGSM=20
+
+picard AddOrReplaceReadGroups \
+       I=Solitaire.bam \
+       O=SolitaireRG.bam \
+       RGID=4 \
+       RGLB=lib1 \
+       RGPL=ILLUMINA \
+       RGPU=unit1 \
+       RGSM=30
+
+picard AddOrReplaceReadGroups \
+       I=SMF045.bam \
+       O=SMF045RG.bam \
+       RGID=4 \
+       RGLB=lib1 \
+       RGPL=ILLUMINA \
+       RGPU=unit1 \
+       RGSM=40
+
+touch all.done
+
+##run
+sbatch addRG.sh
+
+# index_bams2.sh
+
+#!/bin/bash
+#SBATCH --job-name=index
+#SBATCH --time=0-12:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --output=index.%j.out # output file
+#SBATCH --error=index.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=1 # One task per computer
+
+samtools index ./DodoRG.bam
+samtools index ./ManumeaRG.bam
+samtools index ./SolitaireRG.bam
+samtools index ./SMF045RG.bam
+
+touch all.indices.done
+
+##run
+sbatch index_bams2.sh
+
 #make symlinks for bam files in bam directory
 ##ln -s source_file myfile
 
-ln -s ../data/Dodo.bam
-ln -s ../data/Dodo.bam.bai
+ln -s ../data/DodoRG.bam
+ln -s ../data/DodoRG.bam.bai
 
-ln -s ../data/Manumea.bam
-ln -s ../data/Manumea.bam.bai
+ln -s ../data/ManumeaRG.bam
+ln -s ../data/ManumeaRG.bam.bai
 
-ln -s ../data/Solitaire.bam
-ln -s ../data/Solitaire.bam.bai
+ln -s ../data/SolitaireRG.bam
+ln -s ../data/SolitaireRG.bam.bai
 
-ln -s ../data/SMF045.bam
-ln -s ../data/SMF045.bam.bai
+ln -s ../data/SMF045RG.bam
+ln -s ../data/SMF045RG.bam.bai
 
 ##############################################
 #                STEP1 - gimbleprep
