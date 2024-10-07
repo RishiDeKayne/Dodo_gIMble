@@ -225,180 +225,84 @@ cat Nicobar2.polished.gff | grep -v "#" | cut -f4 > Nicobar2.gff.start.txt
 cat Nicobar2.polished.gff | grep -v "#" | cut -f5 > Nicobar2.gff.end.txt
 paste Nicobar2.gff.chrom.txt Nicobar2.gff.start.txt Nicobar2.gff.end.txt > Nicobar2.gff.bed
 
-#make gimble bed file for small chrom
+#make gimble bed
+bedtools subtract -a run1.bed -b ../data/Nicobar2.gff.bed > gimble.intergenic.bed
 
-echo 'CM069651.1  1  6780555' > chrCM069651.bed
-bedtools intersect -a ../../ref_run.bed -b chrCM069651.bed > gimble.chrCM069651.bed
-bedtools subtract -a gimble.chrCM069651.bed -b Nicobar2.gff.bed > gimble.intergenic.chrCM069651.bed
+#pre filtering
+wc -l run1.bed
+#42315640 run1.bed
 
+#post filtering
+wc -l gimble.intergenic.bed 
+#22399378 gimble.intergenic.bed
 
+bcftools query -l ./run1.vcf.gz
+##
+Dodo
+Manumea
+Solitaire
+SMF045
 
+#DodoManumea.samples.csv
+Dodo,do
+Manumea,man
 
+#DodoSolitaire.samples.csv
+Dodo,do
+Solitaire,sol
 
+#DodoSMF045.samples.csv
+Dodo,do
+SMF045,nic
 
+#ManumeaSolitaire.samples.csv
+Manumea,man
+Solitaire,sol
 
+#ManumeaSMF045.samples.csv
+Manumea,man
+SMF045,nic
 
-#want to make a bed file for each inversion that excludes annotations within them
-mkdir -p /scratch/rdekayne/gimble3/reference_indivs_gimble3/bedfiles && cd /scratch/rdekayne/gimble3/reference_indivs_gimble3/bedfiles
+#SolitaireSMF045.samples.csv
+Solitaire,sol
+SMF045,nic
 
-echo 'contig15.1  4035981  5322257' > inv1.1.bed
-echo 'contig15.1  5323805  6220875' > inv1.2.bed
-echo 'contig15.1  6251636 7829094' > inv2.bed
-echo 'contig15.1  14803486  15299732' > inv4.bed
-
-bedtools intersect -a ../../ref_run.bed -b inv1.1.bed > gimble.inv1.1.bed
-bedtools intersect -a ../../ref_run.bed -b inv1.2.bed > gimble.inv1.2.bed
-bedtools intersect -a ../../ref_run.bed -b inv2.bed > gimble.inv2.bed
-bedtools intersect -a ../../ref_run.bed -b inv4.bed > gimble.inv4.bed
-
-wc -l gimble.inv*
-#   80361 gimble.inv1.1.bed
-#   57217 gimble.inv1.2.bed
-#   94876 gimble.inv2.bed
-#   24238 gimble.inv4.bed
-#  256692 total
-
-bedtools subtract -a gimble.inv1.1.bed -b /data/martin/genomics/analyses/Danaus_genome/Dchry2/braker_annotation_RDK_Dchry2_2/Dchry2.2.fa.masked_annotation_a001.sequences.tidy.gff3.bed > gimble.intergenic.inv1.1.bed
-bedtools subtract -a gimble.inv1.2.bed -b /data/martin/genomics/analyses/Danaus_genome/Dchry2/braker_annotation_RDK_Dchry2_2/Dchry2.2.fa.masked_annotation_a001.sequences.tidy.gff3.bed > gimble.intergenic.inv1.2.bed
-bedtools subtract -a gimble.inv2.bed -b /data/martin/genomics/analyses/Danaus_genome/Dchry2/braker_annotation_RDK_Dchry2_2/Dchry2.2.fa.masked_annotation_a001.sequences.tidy.gff3.bed > gimble.intergenic.inv2.bed
-bedtools subtract -a gimble.inv4.bed -b /data/martin/genomics/analyses/Danaus_genome/Dchry2/braker_annotation_RDK_Dchry2_2/Dchry2.2.fa.masked_annotation_a001.sequences.tidy.gff3.bed > gimble.intergenic.inv4.bed
-
-wc -l *.intergenic*
-#   49100 gimble.intergenic.inv1.1.bed
-#   40147 gimble.intergenic.inv1.2.bed
-#   64910 gimble.intergenic.inv2.bed
-#   19560 gimble.intergenic.inv4.bed
-#  173717 total
-
-mkdir -p /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/invs
-cp gimble.intergenic.*.bed /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/invs/
-bcftools query -l ./DC174_allchroms_chr1HAP_output_filt_mindepth7_minqual30_mac4_AN313_AN224_nosmallcontigs_reference_individuals3.b.vcf.gz
-#klu
-SM15W61
-SM15W66
-SM15W69
-SM15W72
-SM15W74
-SM18W01
-#ori
-SM21TS03
-SM21TS05
-SM21TS16
-SM21TS33
-SM21TS34
-SM21TS35
-SM21TS36
-#chr
-SM16N01
-SM16N04
-SM16N05
-SM16N06
-SM16N20
-SM16N37
-#kar
-SM21SP06
-SM21SP09
-#different sample files for different comparisons
-
-#kluori.samples.csv
-SM15W61,klu
-SM15W66,klu
-SM15W69,klu
-SM15W72,klu
-SM15W74,klu
-SM18W01,klu
-SM21TS03,ori
-SM21TS05,ori
-SM21TS16,ori
-SM21TS33,ori
-SM21TS34,ori
-SM21TS35,ori
-SM21TS36,ori
-
-#chrori.samples.csv
-SM16N01,chr
-SM16N04,chr
-SM16N05,chr
-SM16N06,chr
-SM16N20,chr
-SM16N37,chr
-SM21TS03,ori
-SM21TS05,ori
-SM21TS16,ori
-SM21TS33,ori
-SM21TS34,ori
-SM21TS35,ori
-SM21TS36,ori
-
-#chrklu.samples.csv
-SM16N01,chr
-SM16N04,chr
-SM16N05,chr
-SM16N06,chr
-SM16N20,chr
-SM16N37,chr
-SM15W61,klu
-SM15W66,klu
-SM15W69,klu
-SM15W72,klu
-SM15W74,klu
-SM18W01,klu
-
-#karklu.samples.csv
-SM21SP06,kar
-SM21SP09,kar
-SM15W61,klu
-SM15W66,klu
-SM15W69,klu
-SM15W72,klu
-SM15W74,klu
-SM18W01,klu
-
-#karori.samples.csv
-SM21SP06,kar
-SM21SP09,kar
-SM21TS03,ori
-SM21TS05,ori
-SM21TS16,ori
-SM21TS33,ori
-SM21TS34,ori
-SM21TS35,ori
-SM21TS36,ori
-
-#karchr.samples.csv
-SM21SP06,kar
-SM21SP09,kar
-SM16N01,chr
-SM16N04,chr
-SM16N05,chr
-SM16N06,chr
-SM16N20,chr
-SM16N37,chr
-
-wc -l *.samples.csv
-# 12 chrklu.samples.csv
-# 13 chrori.samples.csv
-#  8 karchr.samples.csv
-#  8 karklu.samples.csv
-#  9 karori.samples.csv
-# 13 kluori.samples.csv
-# 63 total
-
-ls *.csv > samples.txt
+ls *.samples.csv | grep -v "run1" > samples.txt
 sed 's/.samples.csv//g' samples.txt > sample_names.txt
-ls *.bed > bed_files.txt
 
 ######PARSE
-touch parse.gimble.run
+
+#gimble_parse_template.sh
+
+#!/bin/bash
+#SBATCH --job-name=parse
+#SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --output=parse.%j.out # output file
+#SBATCH --error=parse.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=4 # One task per computer
+
+gimble parse -v /global/scratch/users/rdekayne/dodo/gimble/run1.vcf.gz -b /global/scratch/users/rdekayne/dodo/gimble/gimble.intergenic.bed -g /global/scratch/users/rdekayne/dodo/gimble/run1.genomefile -s sample_placeholder -z sample_placeholder_store
+
+touch sample_placeholder.parse.done
+
+##
 cat samples.txt | while read sample
 do
-cat bed_files.txt | while read bed
-do
-echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble parse -v /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/ref_run.vcf.gz -b /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/invs/${bed} -g /data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/3rdindiv_set/ref_run.genomefile -s ${sample} -z ${sample}_${bed}_store" >> parse.gimble.run
-done
+sed 's/sample_placeholder/'"${sample}"'/g' gimble_parse_template.sh > gimble_parse_${sample}.sh
 done
 
-parallel -j 1 'qsub -cwd -N gimble_parse -V -pe smp64 20 -l h=bigbird -b yes {}' :::: parse.gimble.run
+##
+ls gimble_parse_*.csv.sh
+sbatch gimble_parse_DodoManumea.samples.csv.sh
+sbatch gimble_parse_DodoSolitaire.samples.csv.sh  
+sbatch gimble_parse_ManumeaSolitaire.samples.csv.sh
+sbatch gimble_parse_DodoSMF045.samples.csv.sh   
+sbatch gimble_parse_ManumeaSMF045.samples.csv.sh  
+sbatch gimble_parse_SolitaireSMF045.samples.csv.sh
+
 
 ######BLOCKS
 touch blocks.gimble.run
