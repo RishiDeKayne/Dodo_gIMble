@@ -303,18 +303,37 @@ sbatch gimble_parse_DodoSMF045.samples.csv.sh
 sbatch gimble_parse_ManumeaSMF045.samples.csv.sh  
 sbatch gimble_parse_SolitaireSMF045.samples.csv.sh
 
-
 ######BLOCKS
-touch blocks.gimble.run
+
+#gimble_blocks_template.sh
+
+#!/bin/bash
+#SBATCH --job-name=parse
+#SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3_bigmem
+#SBATCH --output=parse.%j.out # output file
+#SBATCH --error=parse.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=20 # One task per computer
+
+gimble blocks -z sample_placeholder_store.z -l 64
+
+touch sample_placeholder.blocks.done
+
+##
 cat samples.txt | while read sample
 do
-cat bed_files.txt | while read bed
-do
-echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble blocks -z ${sample}_${bed}_store.z -l 64" >> blocks.gimble.run
-done
+sed 's/sample_placeholder/'"${sample}"'/g' gimble_blocks_template.sh > gimble_blocks_${sample}.sh
 done
 
-parallel -j 1 'qsub -cwd -N gimble_blocks -V -pe smp64 20 -l h=bigbird -b yes {}' :::: blocks.gimble.run
+#ls gimble_blocks_*.csv.sh
+sbatch gimble_blocks_DodoManumea.samples.csv.sh
+gimble_blocks_DodoSolitaire.samples.csv.sh  
+gimble_blocks_ManumeaSolitaire.samples.csv.sh
+gimble_blocks_DodoSMF045.samples.csv.sh   
+gimble_blocks_ManumeaSMF045.samples.csv.sh  
+gimble_blocks_SolitaireSMF045.samples.csv.sh
 
 
 ######WINDOWS
