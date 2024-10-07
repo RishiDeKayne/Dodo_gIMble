@@ -10,6 +10,7 @@ conda install -c conda-forge gimble
 conda install -c bioconda gimbleprep
 conda install conda-forge::rclone
 conda install samtools
+conda install bioconda::bedtools
 
 rclone copy --drive-shared-with-me drive:Rishi/ .
 rclone copy --drive-shared-with-me drive:Rishi/*vcf* .
@@ -100,6 +101,8 @@ bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN1
 conda activate /global/scratch/users/rdekayne/envs/mapping
 
 #add RGs
+#[X] Sample IDs in readgroups of BAM files : 10, 30, 40, 20
+#[X] Sample names in VCF file : Dodo, Manumea, Solitaire, SMF045
 
 ## addRG.sh
 #!/bin/bash
@@ -122,7 +125,7 @@ picard AddOrReplaceReadGroups \
        RGLB=lib1 \
        RGPL=ILLUMINA \
        RGPU=unit1 \
-       RGSM=10
+       RGSM=Dodo
 
 picard AddOrReplaceReadGroups \
        I=Manumea.bam \
@@ -131,7 +134,7 @@ picard AddOrReplaceReadGroups \
        RGLB=lib1 \
        RGPL=ILLUMINA \
        RGPU=unit1 \
-       RGSM=20
+       RGSM=Manumea
 
 picard AddOrReplaceReadGroups \
        I=Solitaire.bam \
@@ -140,7 +143,7 @@ picard AddOrReplaceReadGroups \
        RGLB=lib1 \
        RGPL=ILLUMINA \
        RGPU=unit1 \
-       RGSM=30
+       RGSM=Solitaire
 
 picard AddOrReplaceReadGroups \
        I=SMF045.bam \
@@ -149,7 +152,7 @@ picard AddOrReplaceReadGroups \
        RGLB=lib1 \
        RGPL=ILLUMINA \
        RGPU=unit1 \
-       RGSM=40
+       RGSM=SMF045
 
 touch all.done
 
@@ -216,7 +219,7 @@ touch /global/scratch/users/rdekayne/dodo/gimble/preprocess.done
 ##run
 sbatch 01_gimbleprep.sh
 
-get nicobar gff as bed
+#get nicobar gff as bedl
 cat Nicobar2.polished.gff | grep -v "#" | cut -f1 > Nicobar2.gff.chrom.txt
 cat Nicobar2.polished.gff | grep -v "#" | cut -f4 > Nicobar2.gff.start.txt
 cat Nicobar2.polished.gff | grep -v "#" | cut -f5 > Nicobar2.gff.end.txt
