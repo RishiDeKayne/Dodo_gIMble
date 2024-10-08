@@ -2,6 +2,12 @@
 #make working directory
 #mkdir -p /global/scratch/users/rdekayne/dodo && cd /global/scratch/users/rdekayne/dodo
 
+#########################################
+#########################################
+#              BACKGROUND
+#########################################
+#########################################
+
 ### conda installs
 conda create -p /global/scratch/users/rdekayne/envs/gimble
 source activate base
@@ -270,8 +276,9 @@ SMF045,nic
 ls *.samples.csv | grep -v "run1" > samples.txt
 sed 's/.samples.csv//g' samples.txt > sample_names.txt
 
-######PARSE
-
+##############################################
+#                STEP2 - gimble PARSE
+##############################################
 #gimble_parse_template.sh
 
 #!/bin/bash
@@ -303,17 +310,18 @@ sbatch gimble_parse_DodoSMF045.samples.csv.sh
 sbatch gimble_parse_ManumeaSMF045.samples.csv.sh  
 sbatch gimble_parse_SolitaireSMF045.samples.csv.sh
 
-######BLOCKS
-
+##############################################
+#                STEP3 - gimble BLOCKS
+##############################################
 #gimble_blocks_template.sh
 
 #!/bin/bash
-#SBATCH --job-name=parse
+#SBATCH --job-name=blocks
 #SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
 #SBATCH --account=co_genomicdata
 #SBATCH --partition=savio3_bigmem
-#SBATCH --output=parse.%j.out # output file
-#SBATCH --error=parse.%j.err # error file
+#SBATCH --output=blocks.%j.out # output file
+#SBATCH --error=blocks.%j.err # error file
 #SBATCH --ntasks=1 # Run 1 job
 #SBATCH --ntasks-per-node=20 # One task per computer
 
@@ -329,63 +337,158 @@ done
 
 #ls gimble_blocks_*.csv.sh
 sbatch gimble_blocks_DodoManumea.samples.csv.sh
-gimble_blocks_DodoSolitaire.samples.csv.sh  
-gimble_blocks_ManumeaSolitaire.samples.csv.sh
-gimble_blocks_DodoSMF045.samples.csv.sh   
-gimble_blocks_ManumeaSMF045.samples.csv.sh  
-gimble_blocks_SolitaireSMF045.samples.csv.sh
+sbatch gimble_blocks_DodoSolitaire.samples.csv.sh  
+sbatch gimble_blocks_ManumeaSolitaire.samples.csv.sh
+sbatch gimble_blocks_DodoSMF045.samples.csv.sh   
+sbatch gimble_blocks_ManumeaSMF045.samples.csv.sh  
+sbatch gimble_blocks_SolitaireSMF045.samples.csv.sh
 
+##############################################
+#                STEP4 - gimble WINDOWS
+##############################################
 
-######WINDOWS
-touch windows.gimble.run
+#gimble_windows_template.sh
+
+#!/bin/bash
+#SBATCH --job-name=windows
+#SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3_bigmem
+#SBATCH --output=windows.%j.out # output file
+#SBATCH --error=windows.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=20 # One task per computer
+
+gimble windows -z sample_placeholder_store.z -w 500 -s 100
+
+touch sample_placeholder.windows.done
+
+##
 cat samples.txt | while read sample
 do
-cat bed_files.txt | while read bed
-do
-echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble windows -z ${sample}_${bed}_store.z -w 500 -s 100" >> windows.gimble.run
-done
+sed 's/sample_placeholder/'"${sample}"'/g' gimble_windows_template.sh > gimble_windows_${sample}.sh
 done
 
-parallel -j 1 'qsub -cwd -N gimble_windows -V -pe smp64 20 -l h=bigbird -b yes {}' :::: windows.gimble.run
+#ls gimble_windows_*.csv.sh
+sbatch gimble_windows_DodoManumea.samples.csv.sh  
+sbatch gimble_windows_DodoSolitaire.samples.csv.sh  
+sbatch gimble_windows_ManumeaSolitaire.samples.csv.sh
+sbatch gimble_windows_DodoSMF045.samples.csv.sh   
+sbatch gimble_windows_ManumeaSMF045.samples.csv.sh  
+sbatch gimble_windows_SolitaireSMF045.samples.csv.sh
 
+##############################################
+#                STEP5 - gimble INFO
+##############################################
+#gimble_info_template.sh
 
-######INFO
-touch info.gimble.run
+#!/bin/bash
+#SBATCH --job-name=info
+#SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3_bigmem
+#SBATCH --output=info.%j.out # output file
+#SBATCH --error=info.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=20 # One task per computer
+
+gimble info -z sample_placeholder_store.z
+
+touch sample_placeholder.info.done
+
+##
 cat samples.txt | while read sample
 do
-cat bed_files.txt | while read bed
-do
-echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble info -z ${sample}_${bed}_store.z" >> info.gimble.run
-done
+sed 's/sample_placeholder/'"${sample}"'/g' gimble_info_template.sh > gimble_info_${sample}.sh
 done
 
-parallel -j 1 'qsub -cwd -N gimble_info -V -pe smp64 20 -l h=bigbird -b yes {}' :::: info.gimble.run
+#ls gimble_info_*.csv.sh
+sbatch gimble_info_DodoManumea.samples.csv.sh  
+sbatch gimble_info_DodoSolitaire.samples.csv.sh  
+sbatch gimble_info_ManumeaSolitaire.samples.csv.sh
+sbatch gimble_info_DodoSMF045.samples.csv.sh   
+sbatch gimble_info_ManumeaSMF045.samples.csv.sh  
+sbatch gimble_info_SolitaireSMF045.samples.csv.sh
 
+##############################################
+#                STEP6 - gimble TALLY
+##############################################
+#gimble_tally_template.sh
 
-######TALLY
-touch tally.gimble.run
+#!/bin/bash
+#SBATCH --job-name=tally
+#SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3_bigmem
+#SBATCH --output=tally.%j.out # output file
+#SBATCH --error=tally.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=20 # One task per computer
+
+gimble tally -z sample_placeholder_store.z -k 2,2,2,2 -l blocks_kmax2 -t blocks
+
+touch sample_placeholder.tally.done
+
+##
 cat samples.txt | while read sample
 do
-cat bed_files.txt | while read bed
-do
-echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble tally -z ${sample}_${bed}_store.z -k 2,2,2,2 -l blocks_kmax2 -t blocks" >> tally.gimble.run
-done
+sed 's/sample_placeholder/'"${sample}"'/g' gimble_tally_template.sh > gimble_tally_${sample}.sh
 done
 
-parallel -j 1 'qsub -cwd -N gimble_tally -V -pe smp64 20 -l h=bigbird -b yes {}' :::: tally.gimble.run
+#ls gimble_tally_*.csv.sh
+sbatch gimble_tally_DodoManumea.samples.csv.sh  
+sbatch gimble_tally_DodoSolitaire.samples.csv.sh  
+sbatch gimble_tally_ManumeaSolitaire.samples.csv.sh
+sbatch gimble_tally_DodoSMF045.samples.csv.sh   
+sbatch gimble_tally_ManumeaSMF045.samples.csv.sh  
+sbatch gimble_tally_SolitaireSMF045.samples.csv.sh
 
-######OPTIMIZE
+##############################################
+#                STEP7 - gimble OPTIMIZE DIV
+##############################################
+## mutation rate: 4.6 × 10−9 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5052036/
+## mutation rate: 5.68 x 10−9 https://www.science.org/doi/full/10.1126/science.aao0960?casa_token=rTcGQFLTuIsAAAAA%3AiBs9mI4DSYXiXfMBJNf3gHw70TkRnvNAryLpBSsjzrMcv5_HSEGEdTqmj9ggizFF7ixrrnGAXZf1sJM#supplementary-materials
+## same paper = generation time of 4 years
 
-touch optimize.div.gimble.run
+#gimble_optimize_DIV_template.sh
+
+#!/bin/bash
+#SBATCH --job-name=optimize_DIV
+#SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --output=optimize_DIV.%j.out # output file
+#SBATCH --error=optimize_DIV.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=20 # One task per computer
+
+gimble optimize -z sample_placeholder_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=50_000,20_000_000 -B=50_000,20_000_000 -C=5_000,20_000_000 -T=0,10_000_000 -m DIV -l DIV -f
+
+touch sample_placeholder.optimize_DIV.done
+
+##
 cat samples.txt | while read sample
 do
-cat bed_files.txt | while read bed
-do
-echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/gimble optimize -z ${sample}_${bed}_store.z -d tally/blocks_kmax2 -r A -u 2e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=80_000,6_000_000 -B=80_000,6_000_000 -C=80_000,6_000_000 -T=0,6_000_000 -m DIV -l DIV -f" >> optimize.div.gimble.run
-done
+sed 's/sample_placeholder/'"${sample}"'/g' gimble_optimize_DIV_template.sh > gimble_optimize_DIV_${sample}.sh
 done
 
-parallel -j 1 'qsub -cwd -N gimble_div_optimize -V -pe smp64 20 -l h=bigbird -b yes {}' :::: optimize.div.gimble.run
+#ls gimble_optimize_DIV_*.csv.sh
+sbatch gimble_optimize_DIV_DodoManumea.samples.csv.sh 
+
+sbatch gimble_optimize_DIV_DodoSolitaire.samples.csv.sh
+###gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=1_000,3_000_000 -B=1_000,3_000_000 -C=1_000,3_000_000 -T=0,10_000_000 -m DIV -l DIV -f
+###[+] i=20000 -- {Ne_A_B=1.91562e+05 Ne_A=2.78123e+04 Ne_B=1.51972e+04 T=1.17313e+05} -- lnCL=-4478177.85572 
+
+sbatch gimble_optimize_DIV_ManumeaSolitaire.samples.csv.sh
+sbatch gimble_optimize_DIV_DodoSMF045.samples.csv.sh   
+sbatch gimble_optimize_DIV_ManumeaSMF045.samples.csv.sh  
+sbatch gimble_optimize_DIV_SolitaireSMF045.samples.csv.sh
+
+rm gimble_optimize_DIV_*
+rm optimize_DIV.21486136.*
+##############################################
+#                STEP8 - gimble OPTIMIZE IM_AB
+##############################################
 
 grep "COMPLETED" *.o*
 
@@ -398,8 +501,10 @@ echo "/data/martin/genomics/analyses/Danaus_popgen/DC174/analysis/gimble/gimble/
 done
 done
 
-parallel -j 1 'qsub -cwd -N gimble_div_optimize -V -pe smp64 20 -l h=bigbird -b yes {}' :::: optimize.IM_AB.gimble.run
 
+##############################################
+#                STEP9 - gimble OPTIMIZE IM_BA
+##############################################
 touch optimize.IM_BA.gimble.run
 cat samples.txt | while read sample
 do
@@ -584,6 +689,3 @@ parallel -j 1 'qsub -cwd -N gimble_div_optimize -V -pe smp64 20 -l h=bigbird -b 
 
 
 
-
-https://www.science.org/doi/10.1126/science.aao0960
-https://academic.oup.com/evlett/article/7/4/216/7202139
