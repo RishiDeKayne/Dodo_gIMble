@@ -21,7 +21,9 @@ conda install bioconda::bedtools
 rclone copy --drive-shared-with-me drive:Rishi/ .
 rclone copy --drive-shared-with-me drive:Rishi/*vcf* .
 
-samtools faixd Nicobar2.fasta
+rclone copy --drive-shared-with-me gdrive2:Rishi/ .
+
+samtools faidx Nicobar2.fasta
 
 # cram_to_bam.sh
 
@@ -63,7 +65,7 @@ mv SolitairexNicobar.bam Solitaire.bam
 #SBATCH --job-name=index
 #SBATCH --time=0-12:00:00 # Wall clock time limit in Days-Hours:min:seconds
 #SBATCH --account=co_genomicdata
-#SBATCH --partition=savio3
+#SBATCH --partition=savio4_htc
 #SBATCH --output=index.%j.out # output file
 #SBATCH --error=index.%j.err # error file
 #SBATCH --ntasks=1 # Run 1 job
@@ -72,7 +74,7 @@ mv SolitairexNicobar.bam Solitaire.bam
 samtools index ./Dodo.bam
 samtools index ./Manumea.bam
 samtools index ./Solitaire.bam
-samtools index ./SMF045.bam
+samtools index ./SMF046.bam
 
 touch all.indices.done
 
@@ -83,12 +85,29 @@ sbatch index_bams.sh
 #DODO = do : "Dodo"
 #MANUMEA = ma : "Manumea"
 #SOLITAIRE = so : "Solitaire"
-#NICOBAR = ni : "SMF045"
+#NICOBAR = ni : "SMF046"
 
-#subset overall vcf and then may symlinks to the realigned.bam files for each of these indivs
-#using /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz
+##4_samples_list.txt 
+DodoxNicobar
+ManumeaxNicobar
+SolitairexNicobar
+SMF046
 
-bcftools filter -Oz /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments.vcf.gz -e 'AN < 14' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz
+#subset overall vcf and then make symlinks to the realigned.bam files for each of these indivs
+#using /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz
+
+#first keep only the 4 samples
+bcftools view -Oz -S 4_samples_list.txt /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz
+
+#next filter out sites with missing data and make sure sites are biallelic
+bcftools view -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz -i 'F_MISSING<0.05' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps.vcf.gz
+
+
+
+
+
+
+bcftools filter -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz -e 'AN < 14' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz
 
 bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | wc -l
 #10902319
@@ -97,7 +116,7 @@ bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN1
 Dodo
 Manumea
 Solitaire
-SMF045
+SMF046
 
 bcftools view -Oz -S 4_samples_list.txt -m2 -M2 /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | bcftools view -m2 -M2 | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz
 
