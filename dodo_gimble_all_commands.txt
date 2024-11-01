@@ -96,11 +96,29 @@ SMF046
 #subset overall vcf and then make symlinks to the realigned.bam files for each of these indivs
 #using /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz
 
+# subset_and_filt_vcf.sh
+
+#!/bin/bash
+#SBATCH --job-name=filt
+#SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --output=filt.%j.out # output file
+#SBATCH --error=filt.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=1 # One task per computer
+
 #first keep only the 4 samples
 bcftools view -Oz -S 4_samples_list.txt /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz
 
 #next filter out sites with missing data and make sure sites are biallelic
 bcftools view -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz -i 'F_MISSING<0.05' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps.vcf.gz
+
+bcftools view -H /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz | wc -l
+bcftools view -H /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz | wc -l
+bcftools view -H /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps.vcf.gz | wc -l
+
+touch subset_and_filt_vcf.done
 
 
 
@@ -112,11 +130,6 @@ bcftools filter -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments
 bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | wc -l
 #10902319
 
-##4_samples_list.txt
-Dodo
-Manumea
-Solitaire
-SMF046
 
 bcftools view -Oz -S 4_samples_list.txt -m2 -M2 /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | bcftools view -m2 -M2 | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz
 
