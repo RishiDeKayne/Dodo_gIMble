@@ -120,21 +120,84 @@ bcftools view -H /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_ha
 
 touch subset_and_filt_vcf.done
 
+##run
 
+#make list of chromosomes
+##chromosome.list.txt
 
+CM069626.1 0 215715690
+CM069627.1 0 165538804
+CM069628.1 0 123281365
+CM069629.1 0 80237117
+CM069630.1 0 70088325
+CM069631.1 0 43447330
+CM069632.1 0 40856032
+CM069633.1 0 28597037
+CM069634.1 0 24693610
+CM069635.1 0 23874562
+CM069636.1 0 23244190
+CM069637.1 0 22976119
+CM069638.1 0 21677463
+CM069639.1 0 18160797
+CM069640.1 0 17647009
+CM069641.1 0 14971404
+CM069642.1 0 13865092
+CM069643.1 0 13329923
+CM069644.1 0 11975369
+CM069645.1 0 9101863
+CM069646.1 0 7735983
+CM069647.1 0 7910860
+CM069648.1 0 6600239
+CM069649.1 0 6704977
+CM069650.1 0 6198243
+CM069651.1 0 6780555
+CM069652.1 0 6203457
+CM069653.1 0 5041877
+CM069654.1 0 3728409
+CM069655.1 0 4256029
+CM069656.1 0 3422528
+CM069657.1 0 1766702
+CM069658.1 0 2947727
+CM069659.1 0 1934287
+CM069660.1 0 1995652
+CM069661.1 0 2732226
+CM069662.1 0 2796789
+CM069663.1 0 811232
+CM069664.1 0 410749
+CM069665.1 0 107988563
 
+sed -i 's/ /\t/g' chromosome.list.txt
 
+#then for depth and only chromosomes 
+bcftools view -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps.vcf.gz -e 'FORMAT/DP < 7' | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz
 
-bcftools filter -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz -e 'AN < 14' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz
+bcftools view /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz -H | wc -l
+#47254899
 
-bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | wc -l
-#10902319
+tabix -p vcf /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz
 
+cp chromosome.list.txt chromosome.list.bed
 
-bcftools view -Oz -S 4_samples_list.txt -m2 -M2 /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | bcftools view -m2 -M2 | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz
+bcftools view -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz -R chromosome.list.bed | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz
 
-bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz | wc -l
-10902319
+bcftools view /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz -H | wc -l
+#47230551
+
+bcftools query -l /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz
+
+##
+DodoxNicobar
+ManumeaxNicobar
+SolitairexNicobar
+SMF046
+
+## sample_IDs.txt
+Dodo
+Manumea
+Solitaire
+SMF046
+
+bcftools reheader --samples sample_IDs.txt -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs_reheader.vcf.gz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz
 
 conda activate /global/scratch/users/rdekayne/envs/mapping
 
@@ -147,7 +210,7 @@ conda activate /global/scratch/users/rdekayne/envs/mapping
 #SBATCH --job-name=pic
 #SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
 #SBATCH --account=co_genomicdata
-#SBATCH --partition=savio3
+#SBATCH --partition=savio4_htc
 #SBATCH --output=pic.%j.out # output file
 #SBATCH --error=pic.%j.err # error file
 #SBATCH --ntasks=1 # Run 1 job
@@ -602,5 +665,16 @@ gimble query -z DodoSolitaire.samples.csv_store. -l optimize/blocks_kmax2/IM_AB
 gimble query -z DodoSolitaire.samples.csv_store. -l optimize/blocks_kmax2/IM_BA
 
 
+###old
+bcftools filter -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz -e 'AN < 14' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz
+
+bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | wc -l
+#10902319
+
+
+bcftools view -Oz -S 4_samples_list.txt -m2 -M2 /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps.vcf.gz | bcftools view -m2 -M2 | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz
+
+bcftools view -H /global/scratch/users/rdekayne/dodo/data/Nicobar_Alignments_AN14_m2M2_snps_4samples.vcf.gz | wc -l
+10902319
 
 
