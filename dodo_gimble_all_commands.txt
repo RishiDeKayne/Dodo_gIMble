@@ -318,7 +318,7 @@ ln -s ../data/SMF045RG.bam.bai
 #SBATCH --output=gimb1.%j.out
 #SBATCH --error=gimb1.%j.err
 
-gimbleprep -f /global/scratch/users/rdekayne/dodo2/data/Nicobar2.fasta -v Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs_reheader.vcf.gz -b /global/scratch/users/rdekayne/dodo2/gimble/ -t 20 -o /global/scratch/users/rdekayne/dodo2/gimble/run1
+gimbleprep -f /global/scratch/users/rdekayne/dodo2/data/Nicobar2.fasta -v ../data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs_reheader.vcf.gz -b /global/scratch/users/rdekayne/dodo2/gimble/ -t 20 -o /global/scratch/users/rdekayne/dodo2/gimble/run1
 
 touch /global/scratch/users/rdekayne/dodo/gimble/preprocess.done
 
