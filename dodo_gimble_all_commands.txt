@@ -247,8 +247,8 @@ picard AddOrReplaceReadGroups \
        RGSM=Solitaire
 
 picard AddOrReplaceReadGroups \
-       I=SMF045.bam \
-       O=SMF045RG.bam \
+       I=SMF046.bam \
+       O=SMF046RG.bam \
        RGID=4 \
        RGLB=lib1 \
        RGPL=ILLUMINA \
@@ -275,7 +275,7 @@ sbatch addRG.sh
 samtools index ./DodoRG.bam
 samtools index ./ManumeaRG.bam
 samtools index ./SolitaireRG.bam
-samtools index ./SMF045RG.bam
+samtools index ./SMF046RG.bam
 
 touch all.indices.done
 
@@ -296,8 +296,8 @@ ln -s ../data/ManumeaRG.bam.bai
 ln -s ../data/SolitaireRG.bam
 ln -s ../data/SolitaireRG.bam.bai
 
-ln -s ../data/SMF045RG.bam
-ln -s ../data/SMF045RG.bam.bai
+ln -s ../data/SMF046RG.bam
+ln -s ../data/SMF046RG.bam.bai
 
 ##############################################
 #                STEP1 - gimbleprep
@@ -339,18 +339,18 @@ bedtools subtract -a run1.bed -b ../data/Nicobar2.gff.bed > gimble.intergenic.be
 
 #pre filtering
 wc -l run1.bed
-#42315640 run1.bed
+#42198849 run1.bed
 
 #post filtering
 wc -l gimble.intergenic.bed 
-#22399378 gimble.intergenic.bed
+#22253566 gimble.intergenic.bed
 
 bcftools query -l ./run1.vcf.gz
 ##
 Dodo
 Manumea
 Solitaire
-SMF045
+SMF046
 
 #DodoManumea.samples.csv
 Dodo,do
@@ -360,21 +360,21 @@ Manumea,man
 Dodo,do
 Solitaire,sol
 
-#DodoSMF045.samples.csv
+#DodoSMF046.samples.csv
 Dodo,do
-SMF045,nic
+SMF046,nic
 
 #ManumeaSolitaire.samples.csv
 Manumea,man
 Solitaire,sol
 
-#ManumeaSMF045.samples.csv
+#ManumeaSMF046.samples.csv
 Manumea,man
-SMF045,nic
+SMF046,nic
 
-#SolitaireSMF045.samples.csv
+#SolitaireSMF046.samples.csv
 Solitaire,sol
-SMF045,nic
+SMF046,nic
 
 ls *.samples.csv | grep -v "run1" > samples.txt
 sed 's/.samples.csv//g' samples.txt > sample_names.txt
@@ -412,9 +412,9 @@ ls gimble_parse_*.csv.sh
 sbatch gimble_parse_DodoManumea.samples.csv.sh
 sbatch gimble_parse_DodoSolitaire.samples.csv.sh  
 sbatch gimble_parse_ManumeaSolitaire.samples.csv.sh
-sbatch gimble_parse_DodoSMF045.samples.csv.sh   
-sbatch gimble_parse_ManumeaSMF045.samples.csv.sh  
-sbatch gimble_parse_SolitaireSMF045.samples.csv.sh
+sbatch gimble_parse_DodoSMF046.samples.csv.sh   
+sbatch gimble_parse_ManumeaSMF046.samples.csv.sh  
+sbatch gimble_parse_SolitaireSMF046.samples.csv.sh
 
 ##############################################
 #                STEP3 - gimble BLOCKS
