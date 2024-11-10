@@ -460,8 +460,7 @@ sbatch gimble_blocks_SolitaireSMF046.samples.csv.sh
 #!/bin/bash
 #SBATCH --job-name=windows
 #SBATCH --account=co_genomicdata
-#SBATCH --partition=savio4_htc
-#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --partition=savio3
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=20
@@ -470,7 +469,7 @@ sbatch gimble_blocks_SolitaireSMF046.samples.csv.sh
 #SBATCH --output=windows.%j.out
 #SBATCH --error=windows.%j.err
 
-gimble windows -z sample_placeholder_store.z -w 50_000 -s 100
+gimble windows -z sample_placeholder_store.z -w 20_000 -s 100
 
 touch sample_placeholder.windows.done
 
