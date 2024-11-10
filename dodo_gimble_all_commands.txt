@@ -397,7 +397,7 @@ sed 's/.samples.csv//g' samples.txt > sample_names.txt
 #SBATCH --output=parse.%j.out
 #SBATCH --error=parse.%j.err
 
-gimble parse -v /global/scratch/users/rdekayne/dodo/gimble/run1.vcf.gz -b /global/scratch/users/rdekayne/dodo/gimble/gimble.intergenic.bed -g /global/scratch/users/rdekayne/dodo/gimble/run1.genomefile -s sample_placeholder -z sample_placeholder_store
+gimble parse -v /global/scratch/users/rdekayne/dodo2/gimble/run1.vcf.gz -b /global/scratch/users/rdekayne/dodo2/gimble/gimble.intergenic.bed -g /global/scratch/users/rdekayne/dodo2/gimble/run1.genomefile -s sample_placeholder -z sample_placeholder_store
 
 touch sample_placeholder.parse.done
 
@@ -424,8 +424,7 @@ sbatch gimble_parse_SolitaireSMF046.samples.csv.sh
 #!/bin/bash
 #SBATCH --job-name=blocks
 #SBATCH --account=co_genomicdata
-#SBATCH --partition=savio4_htc
-#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --partition=savio3
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=20
@@ -448,9 +447,9 @@ done
 sbatch gimble_blocks_DodoManumea.samples.csv.sh
 sbatch gimble_blocks_DodoSolitaire.samples.csv.sh  
 sbatch gimble_blocks_ManumeaSolitaire.samples.csv.sh
-sbatch gimble_blocks_DodoSMF045.samples.csv.sh   
-sbatch gimble_blocks_ManumeaSMF045.samples.csv.sh  
-sbatch gimble_blocks_SolitaireSMF045.samples.csv.sh
+sbatch gimble_blocks_DodoSMF046.samples.csv.sh   
+sbatch gimble_blocks_ManumeaSMF046.samples.csv.sh  
+sbatch gimble_blocks_SolitaireSMF046.samples.csv.sh
 
 ##############################################
 #                STEP4 - gimble WINDOWS
@@ -466,7 +465,7 @@ sbatch gimble_blocks_SolitaireSMF045.samples.csv.sh
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=20
-#SBATCH --mem=50G
+#SBATCH --mem=100G
 #SBATCH --time=12:00:00
 #SBATCH --output=windows.%j.out
 #SBATCH --error=windows.%j.err
@@ -485,9 +484,9 @@ done
 sbatch gimble_windows_DodoManumea.samples.csv.sh  
 sbatch gimble_windows_DodoSolitaire.samples.csv.sh  
 sbatch gimble_windows_ManumeaSolitaire.samples.csv.sh
-sbatch gimble_windows_DodoSMF045.samples.csv.sh   
-sbatch gimble_windows_ManumeaSMF045.samples.csv.sh  
-sbatch gimble_windows_SolitaireSMF045.samples.csv.sh
+sbatch gimble_windows_DodoSMF046.samples.csv.sh   
+sbatch gimble_windows_ManumeaSMF046.samples.csv.sh  
+sbatch gimble_windows_SolitaireSMF046.samples.csv.sh
 
 ##############################################
 #                STEP5 - gimble INFO
@@ -497,8 +496,7 @@ sbatch gimble_windows_SolitaireSMF045.samples.csv.sh
 #!/bin/bash
 #SBATCH --job-name=info
 #SBATCH --account=co_genomicdata
-#SBATCH --partition=savio4_htc
-#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --partition=savio3
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=20
@@ -521,9 +519,9 @@ done
 sbatch gimble_info_DodoManumea.samples.csv.sh  
 sbatch gimble_info_DodoSolitaire.samples.csv.sh  
 sbatch gimble_info_ManumeaSolitaire.samples.csv.sh
-sbatch gimble_info_DodoSMF045.samples.csv.sh   
-sbatch gimble_info_ManumeaSMF045.samples.csv.sh  
-sbatch gimble_info_SolitaireSMF045.samples.csv.sh
+sbatch gimble_info_DodoSMF046.samples.csv.sh   
+sbatch gimble_info_ManumeaSMF046.samples.csv.sh  
+sbatch gimble_info_SolitaireSMF046.samples.csv.sh
 
 ##############################################
 #                STEP6 - gimble TALLY
