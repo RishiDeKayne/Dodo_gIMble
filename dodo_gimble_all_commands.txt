@@ -646,11 +646,12 @@ sbatch gimble_tally_SolitaireSMF045.samples.csv.sh
 #SBATCH --output=tally.%j.out
 #SBATCH --error=tally.%j.err
 
-gimble tally -z DodoSolitaire.samples.csv_store.z -k 2,2,2,2 -l blocks_kmax2 -t blocks
+gimble tally -z DodoSolitaire.samples.csv_store.z -k 2,2,2,2 -l blocks_kmax2 -t blocks -f
 
 touch sample_DodoSolitaire.samples.csv.tally.done
 
 gimble query -z DodoSolitaire.samples.csv_store.z -l tally/blocks_kmax2
+
 ##############################################
 #                STEP7.0 - gimble makegrid 
 ##############################################
@@ -737,6 +738,66 @@ sbatch gimble_optimize_DIV_SolitaireSMF045.samples.csv.sh
 
 rm gimble_optimize_DIV_*
 rm optimize_DIV.21486136.*
+
+#gimble_optimize_DIV__DodoSolitaire.samples.csv.sh
+
+#!/bin/bash
+#SBATCH --job-name=optimize_DIV
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=optimize_DIV.%j.out
+#SBATCH --error=optimize_DIV.%j.err
+
+gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=100,10_000_000 -B=50,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -m DIV -l DIV -f
+
+touch sample__DodoSolitaire.samples.csv.optimize_DIV.done
+
+#gimble_optimize_IMAB__DodoSolitaire.samples.csv.sh
+
+#!/bin/bash
+#SBATCH --job-name=optimize_DIV
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=optimize_DIV.%j.out
+#SBATCH --error=optimize_DIV.%j.err
+
+gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=10,10_000_000 -B=10,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -M=0,2.21E-04 -m IM_AB -l IM_AB -f
+
+touch sample__DodoSolitaire.samples.csv.optimize_IMAB.done
+
+#gimble_optimize_IMBA__DodoSolitaire.samples.csv.sh
+
+#!/bin/bash
+#SBATCH --job-name=optimize_DIV
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=optimize_DIV.%j.out
+#SBATCH --error=optimize_DIV.%j.err
+
+gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=10,10_000_000 -B=10,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -M=0,2.21E-04 -m IM_BA -l IM_BA -f
+
+touch sample__DodoSolitaire.samples.csv.optimize_IMBA.done
+
+
+
 ##############################################
 #                STEP8 - gimble OPTIMIZE IM MODELS
 ##############################################
