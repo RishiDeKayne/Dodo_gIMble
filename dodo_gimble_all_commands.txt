@@ -416,6 +416,76 @@ sbatch gimble_parse_DodoSMF046.samples.csv.sh
 sbatch gimble_parse_ManumeaSMF046.samples.csv.sh  
 sbatch gimble_parse_SolitaireSMF046.samples.csv.sh
 
+## gimble_parse_DodoSolitaire.samples.csv.sh
+#!/bin/bash
+#SBATCH --job-name=parse
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=parse.%j.out
+#SBATCH --error=parse.%j.err
+
+gimble parse -v /global/scratch/users/rdekayne/dodo2/gimble/run1.vcf.gz -b /global/scratch/users/rdekayne/dodo2/gimble/gimble.intergenic.bed -g /global/scratch/users/rdekayne/dodo2/gimble/run1.genomefile -s DodoSolitaire.samples.csv -z DodoSolitaire.samples.csv_store
+
+touch DodoSolitaire.samples.csv.parse.done
+
+##############################################
+#                STEP3 - gimble INFO
+##############################################
+#gimble_info_template.sh
+
+#!/bin/bash
+#SBATCH --job-name=info
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=info.%j.out
+#SBATCH --error=info.%j.err
+
+gimble info -z sample_placeholder_store.z
+
+touch sample_placeholder.info.done
+
+##
+cat samples.txt | while read sample
+do
+sed 's/sample_placeholder/'"${sample}"'/g' gimble_info_template.sh > gimble_info_${sample}.sh
+done
+
+#ls gimble_info_*.csv.sh
+sbatch gimble_info_DodoManumea.samples.csv.sh  
+sbatch gimble_info_DodoSolitaire.samples.csv.sh  
+sbatch gimble_info_ManumeaSolitaire.samples.csv.sh
+sbatch gimble_info_DodoSMF046.samples.csv.sh   
+sbatch gimble_info_ManumeaSMF046.samples.csv.sh  
+sbatch gimble_info_SolitaireSMF046.samples.csv.sh
+
+## gimble_info__DodoSolitaire.samples.csv.sh
+
+#!/bin/bash
+#SBATCH --job-name=info
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=info.%j.out
+#SBATCH --error=info.%j.err
+
+gimble info -z DodoSolitaire.samples.csv_store.z
+
+touch sample_DodoSolitaire.samples.csv.info.done
+
 ##############################################
 #                STEP3 - gimble BLOCKS
 ##############################################
@@ -451,6 +521,24 @@ sbatch gimble_blocks_DodoSMF046.samples.csv.sh
 sbatch gimble_blocks_ManumeaSMF046.samples.csv.sh  
 sbatch gimble_blocks_SolitaireSMF046.samples.csv.sh
 
+#gimble_blocks__DodoSolitaire.samples.csv.sh
+
+#!/bin/bash
+#SBATCH --job-name=blocks
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=blocks.%j.out
+#SBATCH --error=blocks.%j.err
+
+gimble blocks -z DodoSolitaire.samples.csv_store.z -l 256
+
+touch sample__DodoSolitaire.samples.csv.blocks.done
+
 ##############################################
 #                STEP4 - gimble WINDOWS
 ##############################################
@@ -469,7 +557,7 @@ sbatch gimble_blocks_SolitaireSMF046.samples.csv.sh
 #SBATCH --output=windows.%j.out
 #SBATCH --error=windows.%j.err
 
-gimble windows -z sample_placeholder_store.z -w 20_000 -s 100
+gimble windows -z sample_placeholder_store.z -w 200 -s 28
 
 touch sample_placeholder.windows.done
 
@@ -487,40 +575,24 @@ sbatch gimble_windows_DodoSMF046.samples.csv.sh
 sbatch gimble_windows_ManumeaSMF046.samples.csv.sh  
 sbatch gimble_windows_SolitaireSMF046.samples.csv.sh
 
-##############################################
-#                STEP5 - gimble INFO
-##############################################
-#gimble_info_template.sh
+#gimble_windows__DodoSolitaire.samples.csv.sh
 
 #!/bin/bash
-#SBATCH --job-name=info
+#SBATCH --job-name=windows
 #SBATCH --account=co_genomicdata
-#SBATCH --partition=savio3
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=20
-#SBATCH --mem=50G
+#SBATCH --mem=100G
 #SBATCH --time=12:00:00
-#SBATCH --output=info.%j.out
-#SBATCH --error=info.%j.err
+#SBATCH --output=windows.%j.out
+#SBATCH --error=windows.%j.err
 
-gimble info -z sample_placeholder_store.z
+gimble windows -z DodoSolitaire.samples.csv_store.z -w 200 -s 20
 
-touch sample_placeholder.info.done
-
-##
-cat samples.txt | while read sample
-do
-sed 's/sample_placeholder/'"${sample}"'/g' gimble_info_template.sh > gimble_info_${sample}.sh
-done
-
-#ls gimble_info_*.csv.sh
-sbatch gimble_info_DodoManumea.samples.csv.sh  
-sbatch gimble_info_DodoSolitaire.samples.csv.sh  
-sbatch gimble_info_ManumeaSolitaire.samples.csv.sh
-sbatch gimble_info_DodoSMF046.samples.csv.sh   
-sbatch gimble_info_ManumeaSMF046.samples.csv.sh  
-sbatch gimble_info_SolitaireSMF046.samples.csv.sh
+touch sample_DodoSolitaire.samples.csv.windows.done
 
 ##############################################
 #                STEP6 - gimble TALLY
@@ -558,6 +630,27 @@ sbatch gimble_tally_DodoSMF045.samples.csv.sh
 sbatch gimble_tally_ManumeaSMF045.samples.csv.sh  
 sbatch gimble_tally_SolitaireSMF045.samples.csv.sh
 
+
+#gimble_tally__DodoSolitaire.samples.csv.sh
+
+#!/bin/bash
+#SBATCH --job-name=tally
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=tally.%j.out
+#SBATCH --error=tally.%j.err
+
+gimble tally -z DodoSolitaire.samples.csv_store.z -k 2,2,2,2 -l blocks_kmax2 -t blocks
+
+touch sample_DodoSolitaire.samples.csv.tally.done
+
+gimble query -z DodoSolitaire.samples.csv_store.z -l tally/blocks_kmax2
 ##############################################
 #                STEP7.0 - gimble makegrid 
 ##############################################
@@ -620,7 +713,7 @@ gridsearch/blocks_kmax2/DIV_grid        4071787 64      1000.0  1000.0  1000.0  
 #SBATCH --output=optimize_DIV.%j.out
 #SBATCH --error=optimize_DIV.%j.err
 
-gimble optimize -z sample_placeholder_store.z -d l -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=50_000,20_000_000 -B=50_000,20_000_000 -C=5_000,20_000_000 -T=0,10_000_000 -m DIV -l DIV -f
+gimble optimize -z sample_placeholder_store.z -d l -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=10_000,20_000_000 -B=10_000,20_000_000 -C=5_000,20_000_000 -T=0,10_000_000 -m DIV -l DIV -f
 
 touch sample_placeholder.optimize_DIV.done
 
