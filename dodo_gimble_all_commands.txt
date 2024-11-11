@@ -758,6 +758,12 @@ gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A 
 
 touch sample__DodoSolitaire.samples.csv.optimize_DIV.done
 
+[+] i=29999 -- {Ne_A_B=1.11714e+06 Ne_A=4.76225e+04 Ne_B=2.34423e+04 T=2.89006e+05} -- lnCL=-1929473.79259 
+[+] i=30000 -- {Ne_A_B=1.11714e+06 Ne_A=4.76225e+04 Ne_B=2.34423e+04 T=2.89006e+05} -- lnCL=-1929473.79259 
+[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=0] 
+[+] Saving demes graph with inferred values ...
+[+] Optimization results saved under label 'optimize/blocks_kmax2/DIV'
+
 #gimble_optimize_IMAB__DodoSolitaire.samples.csv.sh
 
 #!/bin/bash
@@ -770,12 +776,19 @@ touch sample__DodoSolitaire.samples.csv.optimize_DIV.done
 #SBATCH --cpus-per-task=20
 #SBATCH --mem=50G
 #SBATCH --time=12:00:00
-#SBATCH --output=optimize_DIV.%j.out
+#SBATCH --output=optimize_IMAB.%j.out
 #SBATCH --error=optimize_DIV.%j.err
 
 gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=10,10_000_000 -B=10,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -M=0,2.21E-04 -m IM_AB -l IM_AB -f
 
 touch sample__DodoSolitaire.samples.csv.optimize_IMAB.done
+
+[+] i=29999 -- {Ne_A_B=5.37989e+05 Ne_A=9.98929e+06 Ne_B=1.10367e+01 me=5.05730e-10 T=5.23453e+01} -- lnCL=-3095357.53080 
+[+] i=30000 -- {Ne_A_B=5.39192e+05 Ne_A=9.98671e+06 Ne_B=1.10088e+01 me=4.35548e-10 T=5.24381e+01} -- lnCL=-inf [ANOMALY]
+[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=13681] 
+[+] Saving demes graph with inferred values ...
+[+] Optimization results saved under label 'optimize/blocks_kmax2/IM_AB'
+[*] Total runtime was 01h:13m:31.870s
 
 #gimble_optimize_IMBA__DodoSolitaire.samples.csv.sh
 
@@ -789,14 +802,19 @@ touch sample__DodoSolitaire.samples.csv.optimize_IMAB.done
 #SBATCH --cpus-per-task=20
 #SBATCH --mem=50G
 #SBATCH --time=12:00:00
-#SBATCH --output=optimize_DIV.%j.out
+#SBATCH --output=optimize_IMBA.%j.out
 #SBATCH --error=optimize_DIV.%j.err
 
 gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=10,10_000_000 -B=10,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -M=0,2.21E-04 -m IM_BA -l IM_BA -f
 
 touch sample__DodoSolitaire.samples.csv.optimize_IMBA.done
 
-
+[+] i=29999 -- {Ne_A_B=1.02433e+06 Ne_A=2.02151e+01 Ne_B=1.00000e+01 me=5.17105e-12 T=4.96793e+01} -- lnCL=-inf [ANOMALY]
+[+] i=30000 -- {Ne_A_B=1.02194e+06 Ne_A=2.03155e+01 Ne_B=1.00000e+01 me=9.01893e-12 T=4.96705e+01} -- lnCL=-2318965.41819 
+[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=17773] 
+[+] Saving demes graph with inferred values ...
+[+] Optimization results saved under label 'optimize/blocks_kmax2/IM_BA'
+[*] Total runtime was 01h:16m:00.125s
 
 ##############################################
 #                STEP8 - gimble OPTIMIZE IM MODELS
