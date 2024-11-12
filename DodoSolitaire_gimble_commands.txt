@@ -1,1 +1,535 @@
+#De-Kayne 2024
+#make working directory
+#mkdir -p /global/scratch/users/rdekayne/dodo && cd /global/scratch/users/rdekayne/dodo
 
+#########################################
+#########################################
+#              BACKGROUND
+#########################################
+#########################################
+
+### conda installs
+conda create -p /global/scratch/users/rdekayne/envs/gimble
+source activate base
+conda activate /global/scratch/users/rdekayne/envs/gimble
+conda install -c conda-forge gimble
+conda install -c bioconda gimbleprep
+conda install conda-forge::rclone
+conda install samtools
+conda install bioconda::bedtools
+
+rclone copy --drive-shared-with-me drive:Rishi/ .
+rclone copy --drive-shared-with-me drive:Rishi/*vcf* .
+
+rclone copy --drive-shared-with-me gdrive2:Rishi/ .
+
+samtools faidx Nicobar2.fasta
+
+# cram_to_bam.sh
+
+#!/bin/bash
+#SBATCH --job-name=convert
+#SBATCH --time=0-12:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --qos=savio_lowprio
+#SBATCH --output=convert.%j.out # output file
+#SBATCH --error=convert.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=1 # One task per computer
+
+GENOME=$1
+CRAM=$2
+BAM=$3
+
+samtools view -b -T ${GENOME} -o ${BAM} ${CRAM}
+
+touch ${CRAM}_converted.done
+
+##run
+sbatch cram_to_bam.sh Nicobar2.fasta SMF048.cram SMF048.bam
+sbatch cram_to_bam.sh Nicobar2.fasta SMF046.cram SMF046.bam
+sbatch cram_to_bam.sh Nicobar2.fasta SMF045.cram SMF045.bam
+sbatch cram_to_bam.sh Nicobar2.fasta SMF044.cram SMF044.bam
+sbatch cram_to_bam.sh Nicobar2.fasta DodoxNicobar.cram DodoxNicobar.bam
+sbatch cram_to_bam.sh Nicobar2.fasta ManumeaxNicobar.cram ManumeaxNicobar.bam
+sbatch cram_to_bam.sh Nicobar2.fasta SolitairexNicobar.cram SolitairexNicobar.bam
+
+mv DodoxNicobar.bam Dodo.bam
+mv ManumeaxNicobar.bam Manumea.bam
+mv SolitairexNicobar.bam Solitaire.bam
+
+# index_bams.sh
+
+#!/bin/bash
+#SBATCH --job-name=index
+#SBATCH --time=0-12:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --output=index.%j.out # output file
+#SBATCH --error=index.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=1 # One task per computer
+
+samtools index ./Dodo.bam
+samtools index ./Manumea.bam
+samtools index ./Solitaire.bam
+samtools index ./SMF046.bam
+
+touch all.indices.done
+
+##run
+sbatch index_bams.sh
+
+#want to run gIMble on focal indivs, 1 for each morph - put in gimble.indiv.list
+#DODO = do : "Dodo"
+#MANUMEA = ma : "Manumea"
+#SOLITAIRE = so : "Solitaire"
+#NICOBAR = ni : "SMF046"
+
+##4_samples_list.txt 
+DodoxNicobar
+ManumeaxNicobar
+SolitairexNicobar
+SMF046
+
+#subset overall vcf and then make symlinks to the realigned.bam files for each of these indivs
+#using /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz
+
+# subset_and_filt_vcf.sh
+
+#!/bin/bash
+#SBATCH --job-name=filt
+#SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --output=filt.%j.out # output file
+#SBATCH --error=filt.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=1 # One task per computer
+
+#first keep only the 4 samples
+bcftools view -Oz -S 4_samples_list.txt /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz
+
+#next filter out sites with missing data and make sure sites are biallelic
+bcftools view -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz -i 'F_MISSING<0.05' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps.vcf.gz
+
+bcftools view -H /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz | wc -l
+bcftools view -H /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz | wc -l
+bcftools view -H /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps.vcf.gz | wc -l
+
+touch subset_and_filt_vcf.done
+
+##run
+
+#make list of chromosomes
+##chromosome.list.txt
+
+CM069626.1 0 215715690
+CM069627.1 0 165538804
+CM069628.1 0 123281365
+CM069629.1 0 80237117
+CM069630.1 0 70088325
+CM069631.1 0 43447330
+CM069632.1 0 40856032
+CM069633.1 0 28597037
+CM069634.1 0 24693610
+CM069635.1 0 23874562
+CM069636.1 0 23244190
+CM069637.1 0 22976119
+CM069638.1 0 21677463
+CM069639.1 0 18160797
+CM069640.1 0 17647009
+CM069641.1 0 14971404
+CM069642.1 0 13865092
+CM069643.1 0 13329923
+CM069644.1 0 11975369
+CM069645.1 0 9101863
+CM069646.1 0 7735983
+CM069647.1 0 7910860
+CM069648.1 0 6600239
+CM069649.1 0 6704977
+CM069650.1 0 6198243
+CM069651.1 0 6780555
+CM069652.1 0 6203457
+CM069653.1 0 5041877
+CM069654.1 0 3728409
+CM069655.1 0 4256029
+CM069656.1 0 3422528
+CM069657.1 0 1766702
+CM069658.1 0 2947727
+CM069659.1 0 1934287
+CM069660.1 0 1995652
+CM069661.1 0 2732226
+CM069662.1 0 2796789
+CM069663.1 0 811232
+CM069664.1 0 410749
+CM069665.1 0 107988563
+
+sed -i 's/ /\t/g' chromosome.list.txt
+
+#then for depth and only chromosomes 
+bcftools view -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps.vcf.gz -e 'FORMAT/DP < 7' | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz
+
+bcftools view /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz -H | wc -l
+#47254899
+
+tabix -p vcf /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz
+
+cp chromosome.list.txt chromosome.list.bed
+
+bcftools view -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz -R chromosome.list.bed | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz
+
+bcftools view /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz -H | wc -l
+#47230551
+
+bcftools query -l /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz
+
+##
+DodoxNicobar
+ManumeaxNicobar
+SolitairexNicobar
+SMF046
+
+## sample_IDs.txt
+Dodo
+Manumea
+Solitaire
+SMF046
+
+bcftools reheader --samples sample_IDs.txt -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs_reheader.vcf.gz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz
+
+conda activate /global/scratch/users/rdekayne/envs/mapping
+
+#add RGs
+#[X] Sample IDs in readgroups of BAM files : 10, 30, 40, 20
+#[X] Sample names in VCF file : Dodo, Manumea, Solitaire, SMF045
+
+## addRG.sh
+#!/bin/bash
+#SBATCH --job-name=pic
+#SBATCH --time=0-24:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --output=pic.%j.out # output file
+#SBATCH --error=pic.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=1 # One task per computer
+#SBATCH --cpus-per-task=24 # 2 CPUs per job
+
+module load java/22.0.1
+
+picard AddOrReplaceReadGroups \
+       I=Dodo.bam \
+       O=DodoRG.bam \
+       RGID=4 \
+       RGLB=lib1 \
+       RGPL=ILLUMINA \
+       RGPU=unit1 \
+       RGSM=Dodo
+
+picard AddOrReplaceReadGroups \
+       I=Manumea.bam \
+       O=ManumeaRG.bam \
+       RGID=4 \
+       RGLB=lib1 \
+       RGPL=ILLUMINA \
+       RGPU=unit1 \
+       RGSM=Manumea
+
+picard AddOrReplaceReadGroups \
+       I=Solitaire.bam \
+       O=SolitaireRG.bam \
+       RGID=4 \
+       RGLB=lib1 \
+       RGPL=ILLUMINA \
+       RGPU=unit1 \
+       RGSM=Solitaire
+
+picard AddOrReplaceReadGroups \
+       I=SMF046.bam \
+       O=SMF046RG.bam \
+       RGID=4 \
+       RGLB=lib1 \
+       RGPL=ILLUMINA \
+       RGPU=unit1 \
+       RGSM=SMF045
+
+touch all.done
+
+##run
+sbatch addRG.sh
+
+# index_bams2.sh
+
+#!/bin/bash
+#SBATCH --job-name=index
+#SBATCH --time=0-12:00:00 # Wall clock time limit in Days-Hours:min:seconds
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --output=index.%j.out # output file
+#SBATCH --error=index.%j.err # error file
+#SBATCH --ntasks=1 # Run 1 job
+#SBATCH --ntasks-per-node=1 # One task per computer
+
+samtools index ./DodoRG.bam
+samtools index ./ManumeaRG.bam
+samtools index ./SolitaireRG.bam
+samtools index ./SMF046RG.bam
+
+touch all.indices.done
+
+##run
+sbatch index_bams2.sh
+
+cd ../gimble/
+
+#make symlinks for bam files in bam directory
+##ln -s source_file myfile
+
+ln -s ../data/DodoRG.bam
+ln -s ../data/DodoRG.bam.bai
+
+ln -s ../data/ManumeaRG.bam
+ln -s ../data/ManumeaRG.bam.bai
+
+ln -s ../data/SolitaireRG.bam
+ln -s ../data/SolitaireRG.bam.bai
+
+ln -s ../data/SMF046RG.bam
+ln -s ../data/SMF046RG.bam.bai
+
+##############################################
+#                STEP1 - gimbleprep
+##############################################
+
+# 01_gimbleprep.sh
+
+#!/bin/bash
+#SBATCH --job-name=gimb1
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=200G
+#SBATCH --time=12:00:00
+#SBATCH --output=gimb1.%j.out
+#SBATCH --error=gimb1.%j.err
+
+gimbleprep -f /global/scratch/users/rdekayne/dodo2/data/Nicobar2.fasta -v ../data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs_reheader.vcf.gz -b /global/scratch/users/rdekayne/dodo2/gimble/ -t 20 -o /global/scratch/users/rdekayne/dodo2/gimble/run1
+
+touch /global/scratch/users/rdekayne/dodo/gimble/preprocess.done
+
+##run
+sbatch 01_gimbleprep.sh
+
+cd ../data
+#get nicobar gff as bedl
+cat Nicobar2.polished.gff | grep -v "#" | cut -f1 > Nicobar2.gff.chrom.txt
+cat Nicobar2.polished.gff | grep -v "#" | cut -f4 > Nicobar2.gff.start.txt
+cat Nicobar2.polished.gff | grep -v "#" | cut -f5 > Nicobar2.gff.end.txt
+paste Nicobar2.gff.chrom.txt Nicobar2.gff.start.txt Nicobar2.gff.end.txt > Nicobar2.gff.bed
+
+cd ../gimble
+
+#make gimble bed removing any coding regions
+bedtools subtract -a run1.bed -b ../data/Nicobar2.gff.bed > gimble.intergenic.bed
+
+#pre filtering
+wc -l run1.bed
+#42198849 run1.bed
+
+#post filtering
+wc -l gimble.intergenic.bed 
+#22253566 gimble.intergenic.bed
+
+#get order of indivis in vcf
+bcftools query -l ./run1.vcf.gz
+##
+Dodo
+Manumea
+Solitaire
+SMF046
+
+#DodoSolitaire.samples.csv
+Dodo,do
+Solitaire,sol
+
+##############################################
+#                STEP2 - gimble PARSE
+##############################################
+
+## gimble_parse_DodoSolitaire.samples.csv.sh
+#!/bin/bash
+#SBATCH --job-name=parse
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=parse.%j.out
+#SBATCH --error=parse.%j.err
+
+gimble parse -v /global/scratch/users/rdekayne/dodo2/gimble/run1.vcf.gz -b /global/scratch/users/rdekayne/dodo2/gimble/gimble.intergenic.bed -g /global/scratch/users/rdekayne/dodo2/gimble/run1.genomefile -s DodoSolitaire.samples.csv -z DodoSolitaire.samples.csv_store
+
+touch DodoSolitaire.samples.csv.parse.done
+
+##############################################
+#                STEP3 - gimble BLOCKS
+##############################################
+
+#!/bin/bash
+#SBATCH --job-name=blocks
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio3
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=blocks.%j.out
+#SBATCH --error=blocks.%j.err
+
+gimble blocks -z DodoSolitaire.samples.csv_store.z -l 256
+
+touch sample__DodoSolitaire.samples.csv.blocks.done
+
+##############################################
+#                STEP4 - gimble WINDOWS
+##############################################
+
+#!/bin/bash
+#SBATCH --job-name=windows
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=100G
+#SBATCH --time=12:00:00
+#SBATCH --output=windows.%j.out
+#SBATCH --error=windows.%j.err
+
+gimble windows -z DodoSolitaire.samples.csv_store.z -w 200 -s 20
+
+touch sample_DodoSolitaire.samples.csv.windows.done
+
+##############################################
+#                STEP6 - gimble TALLY
+##############################################
+
+#!/bin/bash
+#SBATCH --job-name=tally
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=tally.%j.out
+#SBATCH --error=tally.%j.err
+
+gimble tally -z DodoSolitaire.samples.csv_store.z -k 2,2,2,2 -l blocks_kmax2 -t blocks -f
+
+touch sample_DodoSolitaire.samples.csv.tally.done
+
+gimble query -z DodoSolitaire.samples.csv_store.z -l tally/blocks_kmax2
+
+##############################################
+#                STEP7 - gimble OPTIMIZE DIV
+##############################################
+
+#gimble_optimize_DIV__DodoSolitaire.samples.csv.sh
+
+#!/bin/bash
+#SBATCH --job-name=optimize_DIV
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=optimize_DIV.%j.out
+#SBATCH --error=optimize_DIV.%j.err
+
+gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=100,10_000_000 -B=50,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -m DIV -l DIV -f
+
+touch sample__DodoSolitaire.samples.csv.optimize_DIV.done
+
+##OUTPUT
+[+] i=29999 -- {Ne_A_B=1.11714e+06 Ne_A=4.76225e+04 Ne_B=2.34423e+04 T=2.89006e+05} -- lnCL=-1929473.79259 
+[+] i=30000 -- {Ne_A_B=1.11714e+06 Ne_A=4.76225e+04 Ne_B=2.34423e+04 T=2.89006e+05} -- lnCL=-1929473.79259 
+[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=0] 
+[+] Saving demes graph with inferred values ...
+[+] Optimization results saved under label 'optimize/blocks_kmax2/DIV'
+
+##############################################
+#                STEP8 - gimble OPTIMIZE IMAB
+##############################################
+
+#gimble_optimize_IMAB__DodoSolitaire.samples.csv.sh
+
+#!/bin/bash
+#SBATCH --job-name=optimize_DIV
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=optimize_IMAB.%j.out
+#SBATCH --error=optimize_DIV.%j.err
+
+gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=10,10_000_000 -B=10,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -M=0,2.21E-04 -m IM_AB -l IM_AB -f
+
+touch sample__DodoSolitaire.samples.csv.optimize_IMAB.done
+
+##OUTPUT
+[+] i=29999 -- {Ne_A_B=5.37989e+05 Ne_A=9.98929e+06 Ne_B=1.10367e+01 me=5.05730e-10 T=5.23453e+01} -- lnCL=-3095357.53080 
+[+] i=30000 -- {Ne_A_B=5.39192e+05 Ne_A=9.98671e+06 Ne_B=1.10088e+01 me=4.35548e-10 T=5.24381e+01} -- lnCL=-inf [ANOMALY]
+[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=13681] 
+[+] Saving demes graph with inferred values ...
+[+] Optimization results saved under label 'optimize/blocks_kmax2/IM_AB'
+[*] Total runtime was 01h:13m:31.870s
+
+##############################################
+#                STEP9 - gimble OPTIMIZE IMBA
+##############################################
+
+#gimble_optimize_IMBA__DodoSolitaire.samples.csv.sh
+
+#!/bin/bash
+#SBATCH --job-name=optimize_DIV
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=optimize_IMBA.%j.out
+#SBATCH --error=optimize_DIV.%j.err
+
+gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=10,10_000_000 -B=10,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -M=0,2.21E-04 -m IM_BA -l IM_BA -f
+
+touch sample__DodoSolitaire.samples.csv.optimize_IMBA.done
+
+##OUTPUT
+[+] i=29999 -- {Ne_A_B=1.02433e+06 Ne_A=2.02151e+01 Ne_B=1.00000e+01 me=5.17105e-12 T=4.96793e+01} -- lnCL=-inf [ANOMALY]
+[+] i=30000 -- {Ne_A_B=1.02194e+06 Ne_A=2.03155e+01 Ne_B=1.00000e+01 me=9.01893e-12 T=4.96705e+01} -- lnCL=-2318965.41819 
+[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=17773] 
+[+] Saving demes graph with inferred values ...
+[+] Optimization results saved under label 'optimize/blocks_kmax2/IM_BA'
+[*] Total runtime was 01h:16m:00.125s
