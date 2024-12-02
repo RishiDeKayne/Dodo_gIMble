@@ -333,15 +333,15 @@ ln -s ../data/SMF046RG.bam.bai
 #SBATCH --output=gimb1.%j.out
 #SBATCH --error=gimb1.%j.err
 
-gimbleprep -f /global/scratch/users/rdekayne/dodo2/data/Nicobar2.fasta -v ../data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs_reheader.vcf.gz -b /global/scratch/users/rdekayne/dodo2/gimble/ -t 20 -o /global/scratch/users/rdekayne/dodo2/gimble/run1
+gimbleprep -f /global/scratch/users/rdekayne/dodo3/data/Nicobar2.fasta -v /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz -b /global/scratch/users/rdekayne/dodo3/gimble/ -t 20 -o /global/scratch/users/rdekayne/dodo3/gimble/run1
 
-touch /global/scratch/users/rdekayne/dodo/gimble/preprocess.done
+touch /global/scratch/users/rdekayne/dodo3/gimble/preprocess.done
 
 ##run
 sbatch 01_gimbleprep.sh
 
 cd ../data
-#get nicobar gff as bedl
+#get nicobar gff as bed
 cat Nicobar2.polished.gff | grep -v "#" | cut -f1 > Nicobar2.gff.chrom.txt
 cat Nicobar2.polished.gff | grep -v "#" | cut -f4 > Nicobar2.gff.start.txt
 cat Nicobar2.polished.gff | grep -v "#" | cut -f5 > Nicobar2.gff.end.txt
