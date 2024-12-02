@@ -201,6 +201,18 @@ SMF046
 
 bcftools reheader --samples sample_IDs.txt -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz
 
+##count het sites for each species
+bcftools query -f '[%GT\t]\n' -s Dodo /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz | awk '$1 != "0/0" && $1 != "1/1" && $1 != "./." {count++} END {print count}'
+#511561
+
+bcftools query -f '[%GT\t]\n' -s Manumea /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz | awk '$1 != "0/0" && $1 != "1/1" && $1 != "./." {count++} END {print count}'
+#388406
+
+bcftools query -f '[%GT\t]\n' -s Solitaire /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz | awk '$1 != "0/0" && $1 != "1/1" && $1 != "./." {count++} END {print count}'
+#366659
+
+bcftools query -f '[%GT\t]\n' -s SMF046 /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz | awk '$1 != "0/0" && $1 != "1/1" && $1 != "./." {count++} END {print count}'
+#816590
 
 conda activate /global/scratch/users/rdekayne/envs/mapping
 
