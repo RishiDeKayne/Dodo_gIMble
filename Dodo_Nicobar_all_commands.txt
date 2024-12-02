@@ -22,6 +22,7 @@ rclone copy --drive-shared-with-me drive:Rishi/ .
 rclone copy --drive-shared-with-me drive:Rishi/*vcf* .
 
 rclone copy --drive-shared-with-me gdrive2:Rishi/ .
+rclone copy --drive-shared-with-me gdrive3:Rishi/ .
 
 samtools faidx Nicobar2.fasta
 
@@ -109,18 +110,23 @@ SMF046
 #SBATCH --ntasks-per-node=1 # One task per computer
 
 #first keep only the 4 samples
-bcftools view -Oz -S 4_samples_list.txt /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz
+bcftools view -Oz -S 4_samples_list.txt /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps.vcf.gz | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples.vcf.gz
 
 #next filter out sites with missing data and make sure sites are biallelic
-bcftools view -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz -i 'F_MISSING<0.05' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps.vcf.gz
+bcftools view -Oz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples.vcf.gz -i 'F_MISSING<0.05' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz
 
-bcftools view -H /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced.vcf.gz | wc -l
-bcftools view -H /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples.vcf.gz | wc -l
-bcftools view -H /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps.vcf.gz | wc -l
+bcftools view -H /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps.vcf.gz | wc -l
+bcftools view -H /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples.vcf.gz | wc -l
+bcftools view -H /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz | wc -l
 
 touch subset_and_filt_vcf.done
 
 ##run
+sbatch subset_and_filt_vcf.sh
+
+75749267
+75749267
+26766321
 
 #make list of chromosomes
 ##chromosome.list.txt
@@ -168,22 +174,18 @@ CM069665.1 0 107988563
 
 sed -i 's/ /\t/g' chromosome.list.txt
 
-#then for depth and only chromosomes 
-bcftools view -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps.vcf.gz -e 'FORMAT/DP < 7' | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz
+#then for only chromosomes 
 
-bcftools view /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz -H | wc -l
-#47254899
-
-tabix -p vcf /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz
+tabix -p vcf /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz
 
 cp chromosome.list.txt chromosome.list.bed
 
-bcftools view -Oz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7.vcf.gz -R chromosome.list.bed | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz
+bcftools view -Oz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz -R chromosome.list.bed | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo3/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz
 
-bcftools view /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz -H | wc -l
-#47230551
+bcftools view /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz -H | wc -l
+#26750436
 
-bcftools query -l /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz
+bcftools query -l /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz
 
 ##
 DodoxNicobar
@@ -197,7 +199,8 @@ Manumea
 Solitaire
 SMF046
 
-bcftools reheader --samples sample_IDs.txt -o /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs_reheader.vcf.gz /global/scratch/users/rdekayne/dodo2/data/Nicobar_Alignments_hap2_reduced_4samples_nomissing_m2M2_snps_dp7_CMs.vcf.gz
+bcftools reheader --samples sample_IDs.txt -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz
+
 
 conda activate /global/scratch/users/rdekayne/envs/mapping
 
@@ -386,6 +389,8 @@ sbatch gimble_parse_DodoSMF046.samples.csv.sh
 #                STEP3 - gimble BLOCKS
 ##############################################
 
+## gimble_blocks_DodoSMF046.samples.csv.sh
+
 #!/bin/bash
 #SBATCH --job-name=blocks
 #SBATCH --account=co_genomicdata
@@ -403,9 +408,13 @@ gimble blocks -z DodoSMF046.samples.csv_store.z -l 256
 
 touch sample__DodoSMF046.samples.csv.blocks.done
 
+##run
+sbatch gimble_blocks_DodoSMF046.samples.csv.sh
 ##############################################
 #                STEP4 - gimble WINDOWS
 ##############################################
+
+## gimble_windows_DodoSMF046.samples.csv.sh
 
 #!/bin/bash
 #SBATCH --job-name=windows
@@ -424,9 +433,13 @@ gimble windows -z DodoSMF046.samples.csv_store.z -w 200 -s 20
 
 touch sample_DodoSMF046.samples.csv.windows.done
 
+##run
+sbatch gimble_windows_DodoSMF046.samples.csv.sh
 ##############################################
 #                STEP6 - gimble TALLY
 ##############################################
+
+## gimble_tally_DodoSMF046.samples.csv.sh
 
 #!/bin/bash
 #SBATCH --job-name=tally
@@ -444,6 +457,9 @@ touch sample_DodoSMF046.samples.csv.windows.done
 gimble tally -z DodoSMF046.samples.csv_store.z -k 2,2,2,2 -l blocks_kmax2 -t blocks -f
 
 touch sample_DodoSMF046.samples.csv.tally.done
+
+##run
+sbatch gimble_tally_DodoSMF046.samples.csv.sh
 
 gimble query -z DodoSMF046.samples.csv_store.z -l tally/blocks_kmax2
 
@@ -466,16 +482,15 @@ gimble query -z DodoSMF046.samples.csv_store.z -l tally/blocks_kmax2
 #SBATCH --output=optimize_DIV.%j.out
 #SBATCH --error=optimize_DIV.%j.err
 
-gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=100,10_000_000 -B=50,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -m DIV -l DIV -f
+gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=100,10_000_000 -B=50,10_000_000 -C=500,10_000_000 -T=2_000_000,16_000_000 -m DIV -l DIV -f
 
-touch sample__DodoSolitaire.samples.csv.optimize_DIV.done
+touch sample__DodoSMF046.samples.csv.optimize_DIV.done
+
+##run
+sbatch gimble_optimize_DIV__DodoSMF046.samples.csv.sh
 
 ##OUTPUT
-[+] i=29999 -- {Ne_A_B=1.11714e+06 Ne_A=4.76225e+04 Ne_B=2.34423e+04 T=2.89006e+05} -- lnCL=-1929473.79259 
-[+] i=30000 -- {Ne_A_B=1.11714e+06 Ne_A=4.76225e+04 Ne_B=2.34423e+04 T=2.89006e+05} -- lnCL=-1929473.79259 
-[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=0] 
-[+] Saving demes graph with inferred values ...
-[+] Optimization results saved under label 'optimize/blocks_kmax2/DIV'
+
 
 ##############################################
 #                STEP8 - gimble OPTIMIZE IMAB
