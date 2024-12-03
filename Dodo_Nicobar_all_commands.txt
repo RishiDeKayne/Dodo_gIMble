@@ -368,9 +368,9 @@ Manumea
 Solitaire
 SMF046
 
-#DodoSolitaire.samples.csv
+#DodoSMF046.samples.csv
 Dodo,do
-Solitaire,sol
+SMF046,nic
 
 ##############################################
 #                STEP2 - gimble PARSE
@@ -390,7 +390,7 @@ Solitaire,sol
 #SBATCH --output=parse.%j.out
 #SBATCH --error=parse.%j.err
 
-gimble parse -v /global/scratch/users/rdekayne/dodo2/gimble/run1.vcf.gz -b /global/scratch/users/rdekayne/dodo2/gimble/gimble.intergenic.bed -g /global/scratch/users/rdekayne/dodo2/gimble/run1.genomefile -s DodoSMF046.samples.csv -z DodoSMF046.samples.csv_store
+gimble parse -v /global/scratch/users/rdekayne/dodo3/gimble/run1.vcf.gz -b /global/scratch/users/rdekayne/dodo3/gimble/gimble.intergenic.bed -g /global/scratch/users/rdekayne/dodo3/gimble/run1.genomefile -s DodoSMF046.samples.csv -z DodoSMF046.samples.csv_store
 
 touch DodoSMF046.samples.csv.parse.done
 
@@ -422,6 +422,7 @@ touch sample__DodoSMF046.samples.csv.blocks.done
 
 ##run
 sbatch gimble_blocks_DodoSMF046.samples.csv.sh
+
 ##############################################
 #                STEP4 - gimble WINDOWS
 ##############################################
@@ -447,6 +448,7 @@ touch sample_DodoSMF046.samples.csv.windows.done
 
 ##run
 sbatch gimble_windows_DodoSMF046.samples.csv.sh
+
 ##############################################
 #                STEP6 - gimble TALLY
 ##############################################
@@ -494,7 +496,7 @@ gimble query -z DodoSMF046.samples.csv_store.z -l tally/blocks_kmax2
 #SBATCH --output=optimize_DIV.%j.out
 #SBATCH --error=optimize_DIV.%j.err
 
-gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=100,10_000_000 -B=50,10_000_000 -C=500,10_000_000 -T=2_000_000,16_000_000 -m DIV -l DIV -f
+gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=50,1_000_000 -B=50,1_000_000 -C=500,10_000_000 -T=50_000,16_000_000 -m DIV -l DIV -f
 
 touch sample__DodoSMF046.samples.csv.optimize_DIV.done
 
@@ -523,17 +525,12 @@ sbatch gimble_optimize_DIV__DodoSMF046.samples.csv.sh
 #SBATCH --output=optimize_IMAB.%j.out
 #SBATCH --error=optimize_DIV.%j.err
 
-gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=10,10_000_000 -B=10,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -M=0,2.21E-04 -m IM_AB -l IM_AB -f
+gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=50,1_000_000 -B=50,1_000_000 -C=500,10_000_00 -T=50_000,16_000_000 -M=0,2.21E-04 -m IM_AB -l IM_AB -f
 
 touch sample__DodoSolitaire.samples.csv.optimize_IMAB.done
 
 ##OUTPUT
-[+] i=29999 -- {Ne_A_B=5.37989e+05 Ne_A=9.98929e+06 Ne_B=1.10367e+01 me=5.05730e-10 T=5.23453e+01} -- lnCL=-3095357.53080 
-[+] i=30000 -- {Ne_A_B=5.39192e+05 Ne_A=9.98671e+06 Ne_B=1.10088e+01 me=4.35548e-10 T=5.24381e+01} -- lnCL=-inf [ANOMALY]
-[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=13681] 
-[+] Saving demes graph with inferred values ...
-[+] Optimization results saved under label 'optimize/blocks_kmax2/IM_AB'
-[*] Total runtime was 01h:13m:31.870s
+
 
 ##############################################
 #                STEP9 - gimble OPTIMIZE IMBA
@@ -554,14 +551,9 @@ touch sample__DodoSolitaire.samples.csv.optimize_IMAB.done
 #SBATCH --output=optimize_IMBA.%j.out
 #SBATCH --error=optimize_DIV.%j.err
 
-gimble optimize -z DodoSolitaire.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 30000 -A=10,10_000_000 -B=10,10_000_000 -C=500,10_000_000 -T=0,10_000_000 -M=0,2.21E-04 -m IM_BA -l IM_BA -f
+gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=50,1_000_000 -B=50,1_000_000 -C=500,10_000_00 -T=50_000,16_000_000 -M=0,2.21E-04 -m IM_BA -l IM_BA -f
 
 touch sample__DodoSolitaire.samples.csv.optimize_IMBA.done
 
 ##OUTPUT
-[+] i=29999 -- {Ne_A_B=1.02433e+06 Ne_A=2.02151e+01 Ne_B=1.00000e+01 me=5.17105e-12 T=4.96793e+01} -- lnCL=-inf [ANOMALY]
-[+] i=30000 -- {Ne_A_B=1.02194e+06 Ne_A=2.03155e+01 Ne_B=1.00000e+01 me=9.01893e-12 T=4.96705e+01} -- lnCL=-2318965.41819 
-[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=17773] 
-[+] Saving demes graph with inferred values ...
-[+] Optimization results saved under label 'optimize/blocks_kmax2/IM_BA'
-[*] Total runtime was 01h:16m:00.125s
+\
