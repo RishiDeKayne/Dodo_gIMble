@@ -110,14 +110,18 @@ SMF046
 #SBATCH --ntasks-per-node=1 # One task per computer
 
 #first keep only the 4 samples
-bcftools view -Oz -S 4_samples_list.txt /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps.vcf.gz | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples.vcf.gz
+#bcftools view -Oz -S 4_samples_list.txt /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps.vcf.gz | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples.vcf.gz
+bcftools view -Oz -S 2_samples_list.txt /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps.vcf.gz | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples.vcf.gz
 
 #next filter out sites with missing data and make sure sites are biallelic
-bcftools view -Oz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples.vcf.gz -i 'F_MISSING<0.05' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo2/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz
+#bcftools view -Oz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples.vcf.gz -i 'F_MISSING<0.05' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo3/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz
+bcftools view -Oz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples.vcf.gz -i 'F_MISSING<0.05' | bcftools view -m2 -M2 -v snps | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo3/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps.vcf.gz
 
 bcftools view -H /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps.vcf.gz | wc -l
 bcftools view -H /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples.vcf.gz | wc -l
 bcftools view -H /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz | wc -l
+bcftools view -H /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples.vcf.gz | wc -l
+bcftools view -H /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps.vcf.gz | wc -l
 
 touch subset_and_filt_vcf.done
 
@@ -127,6 +131,8 @@ sbatch subset_and_filt_vcf.sh
 75749267
 75749267
 26766321
+75749267
+68380257
 
 #make list of chromosomes
 ##chromosome.list.txt
@@ -176,14 +182,19 @@ sed -i 's/ /\t/g' chromosome.list.txt
 
 #then for only chromosomes 
 
-tabix -p vcf /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz
+#tabix -p vcf /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz
+tabix -p vcf /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps.vcf.gz
 
 cp chromosome.list.txt chromosome.list.bed
 
-bcftools view -Oz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz -R chromosome.list.bed | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo3/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz
+#bcftools view -Oz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps.vcf.gz -R chromosome.list.bed | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo3/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz
+bcftools view -Oz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps.vcf.gz -R chromosome.list.bed | bcftools sort --temp-dir /global/scratch/users/rdekayne/dodo3/data/tmp/ -Oz -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps_CMs.vcf.gz
 
-bcftools view /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz -H | wc -l
+
+#bcftools view /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz -H | wc -l
 #26750436
+bcftools view /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps_CMs.vcf.gz -H | wc -l
+#68321760
 
 bcftools query -l /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz
 
@@ -199,7 +210,8 @@ Manumea
 Solitaire
 SMF046
 
-bcftools reheader --samples sample_IDs.txt -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz
+#bcftools reheader --samples sample_IDs.txt -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs.vcf.gz
+bcftools reheader --samples sample_IDs2.txt -o /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps_CMs.vcf.gz
 
 ##count het sites for each species
 bcftools query -f '[%GT\t]\n' -s Dodo /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz | awk '$1 != "0/0" && $1 != "1/1" && $1 != "./." {count++} END {print count}'
@@ -213,6 +225,17 @@ bcftools query -f '[%GT\t]\n' -s Solitaire /global/scratch/users/rdekayne/dodo3/
 
 bcftools query -f '[%GT\t]\n' -s SMF046 /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz | awk '$1 != "0/0" && $1 != "1/1" && $1 != "./." {count++} END {print count}'
 #816590
+
+######
+
+##count het sites for each species
+bcftools query -f '[%GT\t]\n' -s Dodo /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz | awk '$1 != "0/0" && $1 != "1/1" && $1 != "./." {count++} END {print count}'
+#511561
+#2115029
+
+bcftools query -f '[%GT\t]\n' -s SMF046 /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz | awk '$1 != "0/0" && $1 != "1/1" && $1 != "./." {count++} END {print count}'
+#816590
+#3117753
 
 conda activate /global/scratch/users/rdekayne/envs/mapping
 
