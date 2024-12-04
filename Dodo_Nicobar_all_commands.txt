@@ -356,7 +356,7 @@ ln -s ../data/SMF046RG.bam.bai
 #SBATCH --output=gimb1.%j.out
 #SBATCH --error=gimb1.%j.err
 
-gimbleprep -f /global/scratch/users/rdekayne/dodo3/data/Nicobar2.fasta -v /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_4samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz -b /global/scratch/users/rdekayne/dodo3/gimble/ -t 20 -o /global/scratch/users/rdekayne/dodo3/gimble/run1
+gimbleprep -f /global/scratch/users/rdekayne/dodo3/data/Nicobar2.fasta -v /global/scratch/users/rdekayne/dodo3/data/Nicobar_Alignments_hap2_reduced.set.filt.snps_2samples_nomissing_m2M2_snps_CMs_reheader.vcf.gz -b /global/scratch/users/rdekayne/dodo3/gimble/ -t 20 -o /global/scratch/users/rdekayne/dodo3/gimble/run1
 
 touch /global/scratch/users/rdekayne/dodo3/gimble/preprocess.done
 
@@ -378,17 +378,17 @@ bedtools subtract -a run1.bed -b ../data/Nicobar2.gff.bed > gimble.intergenic.be
 #pre filtering
 wc -l run1.bed
 #42198849 run1.bed
+#7042313
 
 #post filtering
 wc -l gimble.intergenic.bed 
 #22253566 gimble.intergenic.bed
+#4187007
 
 #get order of indivis in vcf
 bcftools query -l ./run1.vcf.gz
 ##
 Dodo
-Manumea
-Solitaire
 SMF046
 
 #DodoSMF046.samples.csv
@@ -533,7 +533,7 @@ sbatch gimble_optimize_DIV__DodoSMF046.samples.csv.sh
 #                STEP8 - gimble OPTIMIZE IMAB
 ##############################################
 
-#gimble_optimize_IMAB__DodoSolitaire.samples.csv.sh
+#gimble_optimize_IMAB__DodoSMF046.samples.csv.sh
 
 #!/bin/bash
 #SBATCH --job-name=optimize_DIV
@@ -550,7 +550,7 @@ sbatch gimble_optimize_DIV__DodoSMF046.samples.csv.sh
 
 gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=50,1_000_000 -B=50,1_000_000 -C=500,10_000_00 -T=50_000,16_000_000 -M=0,2.21E-04 -m IM_AB -l IM_AB -f
 
-touch sample__DodoSolitaire.samples.csv.optimize_IMAB.done
+touch sample__DodoSMF046.samples.csv.optimize_IMAB.done
 
 ##OUTPUT
 
@@ -559,7 +559,7 @@ touch sample__DodoSolitaire.samples.csv.optimize_IMAB.done
 #                STEP9 - gimble OPTIMIZE IMBA
 ##############################################
 
-#gimble_optimize_IMBA__DodoSolitaire.samples.csv.sh
+#gimble_optimize_IMBA__DodoSMF046.samples.csv.sh
 
 #!/bin/bash
 #SBATCH --job-name=optimize_DIV
@@ -579,4 +579,4 @@ gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 
 touch sample__DodoSolitaire.samples.csv.optimize_IMBA.done
 
 ##OUTPUT
-\
+
