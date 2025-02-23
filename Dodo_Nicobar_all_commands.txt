@@ -527,7 +527,11 @@ touch sample__DodoSMF046.samples.csv.optimize_DIV.done
 sbatch gimble_optimize_DIV__DodoSMF046.samples.csv.sh
 
 ##OUTPUT
-
+[+] i=20000 -- {Ne_A_B=2.63366e+06 Ne_A=6.88204e+04 Ne_B=1.19219e+05 T=7.63917e+05} -- lnCL=-4866711.18905 
+[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=0] 
+[+] Saving demes graph with inferred values ...
+[+] Optimization results saved under label 'optimize/blocks_kmax2/DIV'
+[*] Total runtime was 00h:05m:14.404s
 
 ##############################################
 #                STEP8 - gimble OPTIMIZE IMAB
@@ -553,7 +557,11 @@ gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 
 touch sample__DodoSMF046.samples.csv.optimize_IMAB.done
 
 ##OUTPUT
-
+[+] i=20000 -- {Ne_A_B=9.89733e+05 Ne_A=6.33681e+04 Ne_B=1.30492e+05 me=8.85388e-08 T=1.59712e+07} -- lnCL=-4835269.05254 
+[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=0] 
+[+] Saving demes graph with inferred values ...
+[+] Optimization results saved under label 'optimize/blocks_kmax2/IM_AB'
+[*] Total runtime was 01h:19m:14.699s
 
 ##############################################
 #                STEP9 - gimble OPTIMIZE IMBA
@@ -577,6 +585,13 @@ touch sample__DodoSMF046.samples.csv.optimize_IMAB.done
 gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=50,1_000_000 -B=50,1_000_000 -C=500,10_000_00 -T=50_000,16_000_000 -M=0,2.21E-04 -m IM_BA -l IM_BA -f
 
 touch sample__DodoSolitaire.samples.csv.optimize_IMBA.done
+
+##output
+[+] i=20000 -- {Ne_A_B=1.00000e+06 Ne_A=6.75165e+04 Ne_B=1.26468e+05 me=4.67693e-08 T=1.68024e+06} -- lnCL=-4864363.38817 
+[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=0] 
+[+] Saving demes graph with inferred values ...
+[+] Optimization results saved under label 'optimize/blocks_kmax2/IM_BA'
+[*] Total runtime was 01h:40m:17.580s
 
 ##############################################
 #                STEP10 - gimble OPTIMIZE MIG_AB
@@ -602,4 +617,5 @@ gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 
 touch sample__DodoSolitaire.samples.csv.optimize_MIGAB.done
 
 ##OUTPUT
+
 
