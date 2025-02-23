@@ -612,10 +612,14 @@ touch sample__DodoSolitaire.samples.csv.optimize_IMBA.done
 #SBATCH --output=optimize_MIGAB.%j.out
 #SBATCH --error=optimize_MIGAB.%j.err
 
-gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=50,1_000_000 -B=50,1_000_000 -C=500,10_000_00 -T=50_000,16_000_000 -M=0,2.21E-04 -m MIG_AB -l IM_BA -f
+gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=100,1_000_000 -B=500,1_000_000 -C=500,10_000_00 -M=2.21E-20,2.21E-02 -m MIG_AB -l MIG_AB -f
 
 touch sample__DodoSolitaire.samples.csv.optimize_MIGAB.done
 
 ##OUTPUT
-
+[+] i=20000 -- {Ne_A=1.00000e+02 Ne_B=8.59085e+05 me=1.02015e-03} -- lnCL=-8172706.26265 
+[+] [COMPLETED]  --------- [NLOPT_MAXEVAL_REACHED] [ANOMALIES=0] 
+[+] Saving demes graph with inferred values ...
+[+] Optimization results saved under label 'optimize/blocks_kmax2/MIG_AB'
+[*] Total runtime was 00h:02m:11.020s
 
