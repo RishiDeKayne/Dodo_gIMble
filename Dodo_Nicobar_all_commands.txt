@@ -578,5 +578,28 @@ gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 
 
 touch sample__DodoSolitaire.samples.csv.optimize_IMBA.done
 
+##############################################
+#                STEP10 - gimble OPTIMIZE MIG_AB
+##############################################
+
+#gimble_optimize_MIGAB__DodoSMF046.samples.csv.sh
+
+#!/bin/bash
+#SBATCH --job-name=optimize_MIGAB
+#SBATCH --account=co_genomicdata
+#SBATCH --partition=savio4_htc
+#SBATCH --qos=genomicdata_htc4_normal
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --time=12:00:00
+#SBATCH --output=optimize_MIGAB.%j.out
+#SBATCH --error=optimize_MIGAB.%j.err
+
+gimble optimize -z DodoSMF046.samples.csv_store.z -d tally/blocks_kmax2 -r A -u 5.68e-9 -g CRS2 -p 1 -s midpoint -i 20000 -A=50,1_000_000 -B=50,1_000_000 -C=500,10_000_00 -T=50_000,16_000_000 -M=0,2.21E-04 -m MIG_AB -l IM_BA -f
+
+touch sample__DodoSolitaire.samples.csv.optimize_MIGAB.done
+
 ##OUTPUT
 
